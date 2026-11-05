@@ -29,6 +29,8 @@ The script verifies checkout/branch/origin/clean state, checks GitHub CLI authen
 
 Attendance source is prepared separately in `tmp/attendance-handoff` on `feat/attendance-sessions`, based on the bootstrap commit. The original bootstrap checkout remains on `feat/lms-platform-admissions`; no branch needs to overwrite the other. This increment has 14 passing dependency-free tests and 26 parsed TypeScript/TSX files; full build/integration/camera verification remains blocked.
 
+Actual attendance source commit: `1d3ca9b` — scoped session attendance, rotating codes and leave review. The checkout was clean after committing. Its push again failed before authentication because the session could not connect to GitHub port 443. No attendance issue, remote feature branch or PR is claimed as created. A documentation commit records this result after the source commit.
+
 After publishing the bootstrap with the default invocation above, publish the stacked attendance branch with:
 
 ```powershell
