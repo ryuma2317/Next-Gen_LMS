@@ -16,7 +16,7 @@ The entire LMS is not finished. Default screens use synthetic data. Local npm ac
 ## GitHub workflow requested by owner
 
 - Track every feature/fix with an issue and acceptance criteria, use the respective feature/fix branch, and commit/push coherent increments and completed work. See CONTRIBUTING.md.
-- Repository: ryuma2317/Next-Gen_LMS. Keep unfinished work in draft PRs and do not merge main automatically.
+- Repository: ryuma2317/Next-Gen_LMS. Target development work at dev. The owner authorized merging reviewed work into dev when the exact-head checks pass. Keep production acceptance separate and do not merge main automatically.
 - When GitHub is unavailable, prepare issue bodies in .github/handoff and record the blocker; local issue text is not a remotely created issue.
-- This session's original .git is read-only. Prepared checkouts are tmp/git-handoff (bootstrap), tmp/attendance-handoff (attendance) tmp/learning-handoff (learning) and tmp/verification-handoff (dependency/runtime fixes); each has separate writable Git metadata. Keep source snapshots synchronized deliberately. Never include tmp in commits or overwrite someone else's remote work with force-push.
+- This session's original .git is read-only. Prepared checkouts are tmp/git-handoff (bootstrap), tmp/attendance-handoff (attendance), tmp/learning-handoff (learning) and tmp/verification-handoff (dependency/runtime fixes); each has separate writable Git metadata. Keep source snapshots synchronized deliberately. Never include tmp in commits or overwrite someone else's remote work with force-push.
 - GIT_HANDOFF.md records actual commits/push status. scripts/publish-handoff.ps1 supports bootstrap, attendance and learning publishing from an authenticated environment; it has not been executed remotely here.
