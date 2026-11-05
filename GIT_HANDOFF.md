@@ -2,7 +2,9 @@
 
 Updated 2026-11-05. Repository: `ryuma2317/Next-Gen_LMS`.
 
-Current result: [PR #12](https://github.com/ryuma2317/Next-Gen_LMS/pull/12) merged the reviewed stack into **dev** at `07164d9dc2da8bef1adac0c0564d547ce10ca4ad`, using an expected head SHA and a merge commit that preserves history. Main remains unchanged. [Dev CI run 41984710266](https://github.com/ryuma2317/Next-Gen_LMS/actions/runs/41984710266) passed both jobs after the merge. PRs #9/#10/#11 are closed as superseded, with their source branches retained. Integration tracking: [#14](https://github.com/ryuma2317/Next-Gen_LMS/issues/14).
+Latest quiz continuation: [PR #17](https://github.com/ryuma2317/Next-Gen_LMS/pull/17), branch feat/quiz-modes from dev, contains exam/live-game modes with private server grading and advisory monitoring. [Run 41994150546](https://github.com/ryuma2317/Next-Gen_LMS/actions/runs/41994150546) passes 103 tests, type checking and build on 87e6bd0a89dc7c439fb64d9960c27935e84b3e8e. Exact-head review/merge status is recorded in [#16](https://github.com/ryuma2317/Next-Gen_LMS/issues/16); report access hardening is [#18](https://github.com/ryuma2317/Next-Gen_LMS/issues/18). No live deployment is implied. Prepared feature checkout: tmp/quiz-handoff; the root Git metadata remains untouched. Apply all migrations through 012 for these quiz sources.
+
+Original development integration: [PR #12](https://github.com/ryuma2317/Next-Gen_LMS/pull/12) merged the reviewed stack into **dev** at `07164d9dc2da8bef1adac0c0564d547ce10ca4ad`, using an expected head SHA and a merge commit that preserves history. Main remains unchanged. [Dev CI run 41984710266](https://github.com/ryuma2317/Next-Gen_LMS/actions/runs/41984710266) passed both jobs after the merge. PRs #9/#10/#11 are closed as superseded, with their source branches retained. Integration tracking: [#14](https://github.com/ryuma2317/Next-Gen_LMS/issues/14).
 
 The connector publishes through the Git data API; shell Git still cannot connect to GitHub port 443. No force push, service purchase, live-data import or deployment was performed.
 

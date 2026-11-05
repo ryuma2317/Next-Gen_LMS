@@ -1,0 +1,4 @@
+import type { PublicQuestion } from '../../shared/quizzes'
+export function Choices({ question, selected, disabled, onChange }: { question: PublicQuestion; selected: string[]; disabled: boolean; onChange: (ids: string[]) => void }) {
+ return <fieldset className="quiz-question"><legend>{question.prompt}<small>{question.points} points · {question.kind==='multiple'?'Select all correct options':'Choose one'}</small></legend>{question.options.map(option=><label className="quiz-option" key={option.id}><input type={question.kind==='single'?'radio':'checkbox'} name={question.id} checked={selected.includes(option.id)} disabled={disabled} onChange={()=>onChange(question.kind==='single'?[option.id]:selected.includes(option.id)?selected.filter(id=>id!==option.id):[...selected,option.id])}/><span>{option.text}</span></label>)}</fieldset>
+}

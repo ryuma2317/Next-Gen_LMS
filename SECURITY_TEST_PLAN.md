@@ -2,7 +2,7 @@
 
 Updated: 2026-11-05. Companion to [SECURITY.md](SECURITY.md) and the [README operational runbook](README.md).
 
-**Execution status: NOT RUN for every full scenario below.** Initial application and test sources now exist; see [IMPLEMENTATION.md](IMPLEMENTATION.md). CI now passes 21 domain/validation/challenge tests, 37 API/PGlite tests and 16 synthetic Chromium browser tests. These provide scoped supporting evidence, but do not complete these end-to-end security scenarios. No database deployment or full security test run has occurred. Passing regressions include named default function grants, grading draft privacy, attendance expiry checks and private leave-read visibility. Actual lock-wait concurrency and real Supabase/MFA/device tests remain separate requirements; see IMPLEMENTATION.md for the CI run.
+**Execution status: NOT RUN for every full scenario below.** Initial application and test sources now exist; see [IMPLEMENTATION.md](IMPLEMENTATION.md). The quiz feature increment passes 27 domain/validation/challenge tests, 52 API/PGlite tests and 24 synthetic Chromium browser tests (run 41994150546). These provide scoped supporting evidence, but do not complete these end-to-end security scenarios. No database deployment or full security test run has occurred. Passing regressions include named default function grants, grading draft privacy, attendance expiry checks and private leave-read visibility. Actual lock-wait concurrency and real Supabase/MFA/device tests remain separate requirements; see IMPLEMENTATION.md for the CI run.
 
 ## How to use this plan
 
@@ -125,3 +125,7 @@ Allowed statuses: NOT RUN; BLOCKED (state the missing decision/dependency); FAIL
 ## Completion boundary
 
 This plan covers important known risks, not every possible vulnerability. Add regression cases for real incidents, new integrations and newly discovered paths. Before real data is admitted, the supervising teacher must review critical auth/database workflows and operational readiness. An external assessment can be useful if a sponsor provides one, but it does not replace these implementation checks or become an assumed subscription expense.
+
+## Quiz-specific evidence boundary
+
+QUIZZES.md records passing choice validation, private-key projections, grading/report capability separation, stale/duplicate answers, deadlines, timed reveal, advisory signals and preview-browser tests. These do not complete live security scenarios. Test actual Supabase/PostgREST envelopes, provider MFA and revocation, unsupported/mobile fullscreen, suppressed/delayed signals, lost saves, re-entry after expired attempts, independent connections and peak game load before handling real scores. No browser flag is a cheating verdict or a certificate decision.
