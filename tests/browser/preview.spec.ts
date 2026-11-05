@@ -1,0 +1,16 @@
+import { test,expect } from '@playwright/test'
+test('preview selection and navigation stay usable on desktop and mobile',async({page})=>{
+ await page.goto('/')
+ await expect(page.getByRole('heading',{name:'A new day. A step ahead.'})).toBeVisible()
+ await page.getByRole('button',{name:'Explore your subjects'}).click()
+ await expect(page.getByRole('heading',{name:'2 of 4 subjects selected'})).toBeVisible()
+ await page.getByRole('article').filter({has:page.getByRole('heading',{name:'Digital Product Design'})}).getByRole('button',{name:'Select',exact:true}).click()
+ await expect(page.getByRole('heading',{name:'3 of 4 subjects selected'})).toBeVisible()
+ await page.getByRole('button',{name:'Reset demo'}).click()
+ await expect(page.getByRole('heading',{name:'2 of 4 subjects selected'})).toBeVisible()
+ await page.getByLabel('Preview as').selectOption('Guest juror')
+ await page.getByRole('button',{name:'Sign in',exact:false}).first().click()
+ await expect(page.getByRole('dialog')).toBeVisible()
+ await page.getByRole('button',{name:'Close sign in'}).click()
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true)
+})

@@ -1,0 +1,8 @@
+# Worker server configuration. Use the same project as the frontend.
+SUPABASE_URL=
+SUPABASE_PUBLISHABLE_KEY=
+# Server-only key for the narrow public-intake bridge and optional invitation jobs.
+# NEVER copy this to a VITE variable. Leave empty to keep public writes disabled.
+SUPABASE_SECRET_KEY=
+ENABLE_INVITATIONS=false
+INVITE_REDIRECT_URL=
