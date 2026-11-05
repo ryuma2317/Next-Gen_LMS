@@ -96,7 +96,7 @@ Race-safety is settled; the allocation policy is not. First-come, lottery and ad
 
 Trainee Today shows the assigned subject, room, theory 09:00–10:30, break to 10:45, and lab 10:45–12:15 using the owner's stated timings. Trainers see their teaching duties and separate afternoon project work. Friday replacements, holidays and seminars use scheduled event exceptions rather than another rigid weekday rule.
 
-Class detail proposes tabs for overview, materials, assignments, quizzes, announcements and personal results. A trainer's version adds roster, grading and attendance controls. Assessment types, attempt rules, group submissions and late-submission policies remain to be specified.
+Class detail proposes tabs for overview, materials, assignments, quizzes, announcements and personal results. A trainer's version adds roster, grading and attendance controls. Initial exam/live-game quiz flows and supported settings are specified in QUIZZES.md; broader formats, grading appeals and certificate weights remain pending. Group submissions and broader assignment policies remain to be specified.
 
 Attendance screen flow: trainer starts the assigned session -> displays rotating QR/code -> trainee authenticates and scans/types -> server verifies enrollment/window -> receipt -> trainer finalizes roster -> leave/correction review -> updated points and certificate-eligibility status.
 

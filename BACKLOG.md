@@ -63,10 +63,12 @@ Attendance source now covers scheduling, scoped rosters, six-second QR/manual ch
 
 Branch: `feat/learning-assignments`, stacked on attendance. Prepared issue bodies: `.github/handoff/learning.md`, `time-guards.md` and `function-grants.md`. Source covers lesson publication, explicitly configured individual assignments, immutable submissions, separately released grading, post-lock code expiry and named function-role grants. Latest narrow evidence: 21 passing dependency-free tests and 33 parsed TypeScript/TSX files. All runtime-dependent criteria remain open; remote issues #6/#7/#8 now exist (linked in GIT_HANDOFF.md).
 
-Remaining learning work includes quizzes, file/group submissions, server autosave/resumption, content revision/withdrawal, appeals/rubrics, larger catalogue pagination and approved transcript/certificate policy. Real multi-role workspace switching and all edition/section assignment administration also remain unfinished; SQL authorization is independent of preview labels.
+Remaining learning work includes broader quiz formats and workflows, file/group submissions, server autosave/resumption, content revision/withdrawal, appeals/rubrics, larger catalogue pagination and approved transcript/certificate policy. Real multi-role workspace switching and all edition/section assignment administration also remain unfinished; SQL authorization is independent of preview labels.
 
 CI runtime fixes are tracked in [#13](https://github.com/ryuma2317/Next-Gen_LMS/issues/13), alongside dependency verification [#1](https://github.com/ryuma2317/Next-Gen_LMS/issues/1). Migration 006 fixes admissions SQL ambiguity and leave-read RLS without widening direct table access. See IMPLEMENTATION.md for actual rerun evidence.
 
 ## Exam and live-game quizzes
 
 [Issue #16](https://github.com/ryuma2317/Next-Gen_LMS/issues/16), branch feat/quiz-modes from dev. Source increment covers teacher authoring/keys, explicit publication settings, timed exam saves/automatic grading, advisory fullscreen/visibility reports and live-game hosting/locked answers/standings. See QUIZZES.md for known limits, pending policy, operational testing and implementation bounds. Keep acceptance criteria open until actual evidence is attached.
+
+Quiz evidence: run [41994150546](https://github.com/ryuma2317/Next-Gen_LMS/actions/runs/41994150546) passes 103 automated tests, type checking and production build. PR #17 and report-scope bug #18 link the exact source/review. Keep live-provider/device/concurrency/load acceptance separate; teachers select settings explicitly and browser reports never declare cheating.

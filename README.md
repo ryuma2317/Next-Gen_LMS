@@ -1,6 +1,6 @@
 # Next-Gen Engagement Platform
 
-Development workspace for the yearly CADT Next-Gen Engagement program. Build 0.4 includes initial selection, admissions, attendance, lesson, assignment/submission and grading sources. Live configuration and verification remain pending; it is not ready for real participants.
+Development workspace for the yearly CADT Next-Gen Engagement program. Build 0.4 includes initial selection, admissions, attendance, lesson, assignment/submission, grading and initial exam/live-game quiz sources. Live configuration and verification remain pending; it is not ready for real participants.
 
 ## Start here
 
@@ -28,9 +28,9 @@ With Node 22.12+ and npm registry access, run `npm.cmd ci` then `npm.cmd run dev
 
 Local package installation remains blocked, but GitHub Actions generated the reviewed dependency lock and has installed packages and passed type checking. Twenty-one dependency-free tests passed locally and in CI. The complete rerun on the verification branch passed 21 domain tests, 37 API/PGlite tests, the client/Worker build and 16 Chromium browser tests after migration 006 fixed two database defects. Evidence and remaining live-integration limits are recorded in IMPLEMENTATION.md.
 
-Account settings include initial authenticator enrollment and verification sources; provider testing is pending. Initial learning sources now include lesson drafts, configured individual text/link assignments, immutable submissions and separately released grading. Initial exam/live-game quiz sources are under verification; see QUIZZES.md. Broader quiz formats, file/group submissions, complete disputes/certificates, projects/rooms, jury/voting and administration workflows remain unfinished.
+Account settings include initial authenticator enrollment and verification sources; provider testing is pending. Initial learning sources now include lesson drafts, configured individual text/link assignments, immutable submissions and separately released grading. Initial exam/live-game quiz sources pass automated CI: 103 domain/API/PGlite/Chromium tests plus type checking and build. Actual provider/device/load/security acceptance remains pending; see QUIZZES.md. Broader quiz formats, file/group submissions, complete disputes/certificates, projects/rooms, jury/voting and administration workflows remain unfinished.
 
-**Current setup requires every migration through `202611050012_quiz_report_scope.sql`.** The latest Worker and migrations 004/005/006 must be deployed together in the reviewed development/release process. Migration 004 replaces the attendance recording interface; 005 explicitly restricts named-role function grants. Earlier increment setup notes are historical and do not establish readiness to expose live intake or check-in.
+**Current setup requires every migration through `202611050012_quiz_report_scope.sql`.** The latest Worker and migrations 004/005/006 must be deployed together in the reviewed development/release process. Migration 004 replaces the attendance recording interface; 005 explicitly restricts named-role function grants. Quiz sources require the full set through 012 with the matching client/API, including timed reveals and private-report permission fixes. Earlier increment setup notes are historical and do not establish readiness to expose live intake or check-in.
 
 ## Current direction
 

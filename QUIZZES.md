@@ -2,7 +2,7 @@
 
 Owner request: two varieties, an exam-style quiz with fullscreen/tab-exit reporting and a Kahoot-style game. Teachers create questions, specify correct answers and receive automatic grading/results. Tracking: [issue #16](https://github.com/ryuma2317/Next-Gen_LMS/issues/16), branch feat/quiz-modes from dev.
 
-This is a new source increment, pending its own CI/live verification. The entire LMS remains unfinished. No new subscription, service purchase, deployment or real assessment data is involved.
+This source increment passed automated CI on its tested head. Actual provider/device/load/security acceptance remains pending. The entire LMS remains unfinished. No new subscription, service purchase, deployment or real assessment data is involved.
 
 ## Shared behavior
 
@@ -50,7 +50,7 @@ Apply the complete migrations through 012 with matching API/client sources in an
 
 New tests cover domain validation/grading, API field restrictions, named grants, draft/key privacy, class scope/MFA, stale versions, expiry/attempt limits, monitoring idempotency and live answer locking/reveal. Browser tests use synthetic data and simulated fullscreen for deterministic UI checks; actual browser/device behavior, provider integration, independent security review, network interruptions and separate-connection contention still need evidence.
 
-Pending owner preferences were asked asynchronously: preferred exam release, game scoring and monitoring response. Explicit per-quiz teacher selection avoids silently choosing these policies. Latest actual check/PR/merge evidence belongs in IMPLEMENTATION.md and GIT_HANDOFF.md.
+Pending owner preferences were asked asynchronously: preferred exam release, game scoring and monitoring response. Explicit per-quiz teacher selection avoids silently choosing these policies. Automated evidence: [run 41994150546](https://github.com/ryuma2317/Next-Gen_LMS/actions/runs/41994150546) passes npm ci, type checking, 27 domain tests, 52 API/PGlite tests, client/Worker build and 24 Chromium preview tests on 87e6bd0a89dc7c439fb64d9960c27935e84b3e8e. Browser fullscreen is simulated in one deterministic test; actual school devices remain unverified. PR #17 and issues #16/#18 track review/merge and live limits.
 
 Migration 010 replaces the provisional scalar-set quiz list with an explicit JSON array and notifies PostgREST to reload its schema. The API rejects unexpected envelopes instead of passing malformed collections into the interface. Verify the real provider RPC shapes during live integration; PGlite alone tests SQL results, not the HTTP gateway.
 
