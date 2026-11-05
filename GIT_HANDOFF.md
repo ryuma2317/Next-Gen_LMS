@@ -2,18 +2,20 @@
 
 Updated 2026-11-05. Repository: `ryuma2317/Next-Gen_LMS`.
 
-The GitHub connector recovered and successfully published the prepared work through the Git data API. Shell Git still cannot connect to GitHub port 443. No force push, merge, service purchase, live-data import or deployment was performed.
+Current result: [PR #12](https://github.com/ryuma2317/Next-Gen_LMS/pull/12) merged the reviewed stack into **dev** at `07164d9dc2da8bef1adac0c0564d547ce10ca4ad`, using an expected head SHA and a merge commit that preserves history. Main remains unchanged. [Dev CI run 41984710266](https://github.com/ryuma2317/Next-Gen_LMS/actions/runs/41984710266) passed both jobs after the merge. PRs #9/#10/#11 are closed as superseded, with their source branches retained. Integration tracking: [#14](https://github.com/ryuma2317/Next-Gen_LMS/issues/14).
 
-## Published branch stack
+The connector publishes through the Git data API; shell Git still cannot connect to GitHub port 443. No force push, service purchase, live-data import or deployment was performed.
 
-| Branch | Draft pull request | Published source commit |
+## Original source stack (historical)
+
+| Branch | Pull request status | Published source commit |
 | --- | --- | --- |
-| `feat/lms-platform-admissions` | [#9](https://github.com/ryuma2317/Next-Gen_LMS/pull/9), targets main | `b5d4c381f94c1b63115f8f10964a3e1a1d1639ea` |
-| `feat/attendance-sessions` | [#10](https://github.com/ryuma2317/Next-Gen_LMS/pull/10), targets foundation | `f324175f20dbead813d46fb7e91fc5bafb1124a2` |
-| `feat/learning-assignments` | [#11](https://github.com/ryuma2317/Next-Gen_LMS/pull/11), targets attendance | `6d7a08b7d0f4ee2d50b4653c66d86aad62d97cde` |
-| `fix/dependency-verification` | [#12](https://github.com/ryuma2317/Next-Gen_LMS/pull/12), targets learning | `513e306742ec50e4434daf2910e3236699bb4e4b` (runtime fix; later evidence/docs commits may follow) |
+| `feat/lms-platform-admissions` | [#9](https://github.com/ryuma2317/Next-Gen_LMS/pull/9), closed as superseded | `b5d4c381f94c1b63115f8f10964a3e1a1d1639ea` |
+| `feat/attendance-sessions` | [#10](https://github.com/ryuma2317/Next-Gen_LMS/pull/10), closed as superseded | `f324175f20dbead813d46fb7e91fc5bafb1124a2` |
+| `feat/learning-assignments` | [#11](https://github.com/ryuma2317/Next-Gen_LMS/pull/11), closed as superseded | `6d7a08b7d0f4ee2d50b4653c66d86aad62d97cde` |
+| `fix/dependency-verification` | [#12](https://github.com/ryuma2317/Next-Gen_LMS/pull/12), merged into dev | `343bc58241f6195f2bdcee2b50dae8bc31f982d4` (reviewed integration head) |
 
-`main` remains the original `1315aa449acd2174c0e1be8d264f261cd36bc3b2`. Review the stack in order. Earlier source branches are historical increments, not independent production-ready deployments. Current setup requires all migrations through 006 plus the matching Worker.
+`main` remains the original `1315aa449acd2174c0e1be8d264f261cd36bc3b2`. Use dev as the base for subsequent feature/fix branches. The old stacked PRs are historical and must not be merged into main separately. Earlier source branches are historical increments, not independent production-ready deployments. Current setup requires all migrations through 006 plus the matching Worker.
 
 ## Issues and acceptance criteria
 
@@ -27,7 +29,7 @@ The GitHub connector recovered and successfully published the prepared work thro
 - [#8 Named function grants](https://github.com/ryuma2317/Next-Gen_LMS/issues/8)
 - [#13 Runtime admissions/leave defects](https://github.com/ryuma2317/Next-Gen_LMS/issues/13)
 
-All issues remain open for acceptance review. Local issue bodies are retained in `.github/handoff`; they are now accompanied by verified remote issues. Unimplemented program epics remain recorded in BACKLOG.md and must receive detailed issue criteria before implementation.
+Feature/live-acceptance issues remain open. Integration #14 records the completed development merge separately from production readiness. Local issue bodies are retained in `.github/handoff`; they are now accompanied by verified remote issues. Unimplemented program epics remain recorded in BACKLOG.md and must receive detailed issue criteria before implementation.
 
 ## Checkouts and original commit preservation
 
@@ -36,7 +38,8 @@ The root checkout's protected `.git` remains untouched on main. Writable isolate
 - `tmp/git-handoff`: foundation branch.
 - `tmp/attendance-handoff`: attendance branch.
 - `tmp/learning-handoff`: learning branch.
-- `tmp/verification-handoff`: dependency/runtime verification branch.
+- `tmp/verification-handoff`: historical dependency/runtime verification branch.
+- `tmp/dev-handoff`: current development checkout; use dev as the baseline and create new branches from it. The evidence update is prepared on docs/dev-integration-handoff before returning this checkout to dev.
 
 GitHub API commits have different IDs from the original local commits because their commit metadata differs. The six uploaded feature-history trees were compared with their corresponding local Git tree SHA and matched exactly; verification fixes were checked the same way. Original local histories are retained on `archive/local-platform-admissions`, `archive/local-attendance-sessions`, `archive/local-learning-assignments` and `archive/local-dependency-verification`. Verified remote commit objects were imported into the isolated checkouts without overwriting the root metadata; branch heads and origin refs match the published histories. A separate local evidence commit is preserved when synchronizing the final documentation update.
 
@@ -59,6 +62,6 @@ With the lock committed, run [41982089448](https://github.com/ryuma2317/Next-Gen
 
 Use `npm.cmd ci` in a normal Windows terminal with registry access (or `npm ci` elsewhere). The existing main CI remains mandatory; the temporary lock-resolution workflow does not bypass it. Do not blindly approve dependency install scripts. Review the resolved packages and any provider/runtime requirements before release.
 
-The fallback `scripts/publish-handoff.ps1` still supports bootstrap/attendance/learning when shell Git and gh access are available. Those branches, issues and draft PRs already exist, so inspect their current heads before using any publishing command. Publish the verification branch through its actual checked-out Git branch or the connector, and never force old local history over a remote branch. No GitHub CLI sign-in or global execution-policy change is needed for the connector path used here.
+The fallback `scripts/publish-handoff.ps1` is a historical initial-publication helper for the old source stack. Do not use it to reopen the superseded PRs or merge them into main. For new work, branch from dev and open the feature/fix PR against dev. Never force old local history over a remote branch. No GitHub CLI sign-in or global execution-policy change is needed for the connector path used here.
 
-The latest verification branch is green; older draft PR heads retain their historical missing-lock failures. Review the whole stack and reconcile required checks before any future merge. Nothing has been merged automatically.
+The reviewed integration head passed [run 41984197821](https://github.com/ryuma2317/Next-Gen_LMS/actions/runs/41984197821) before the authorized merge; the resulting dev commit passed run 41984710266. Both runs include installation, type checking, 21 domain + 37 API/PGlite + 16 Chromium preview tests and client/Worker build. Older drafts retained historical failures, so their complete fixed descendant was merged as one reviewed integration. Main has not been merged or deployed.
