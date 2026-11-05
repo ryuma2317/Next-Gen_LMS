@@ -1,0 +1,39 @@
+name: Resolve initial dependency lock
+on:
+  push:
+    branches: [fix/dependency-verification]
+permissions:
+  contents: read
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Resolve public package metadata without running install scripts
+        id: resolve
+        if: ${{ hashFiles('package-lock.json') == '' }}
+        run: npm install --package-lock-only --ignore-scripts
+      # Only the public dependency lock is exported. No secrets, account files,
+      # environment dumps or private program data are read by this workflow.
+      # The connector can read text logs; the SHA-256 verifies reconstruction.
+      - name: Export generated lock for review and commit
+        if: ${{ steps.resolve.outcome == 'success' }}
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          import { createHash } from 'node:crypto';
+          const bytes = readFileSync('package-lock.json');
+          const encoded = bytes.toString('base64');
+          for (let offset = 0; offset < encoded.length; offset += 12000) {
+            console.log(`LOCK_CHUNK_${offset / 12000}=${encoded.slice(offset, offset + 12000)}`);
+          }
+          console.log(`LOCK_SHA256=${createHash('sha256').update(bytes).digest('hex')}`);
+          NODE
