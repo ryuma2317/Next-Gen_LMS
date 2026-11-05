@@ -3,7 +3,7 @@ import { app } from '../server/index'
 describe('API boundary',()=>{
  it('health reports no private configuration and is not cached',async()=>{
   const response=await app.request('/api/health');expect(response.status).toBe(200)
-  expect(await response.json()).toEqual({status:'ok',version:'0.3.0'})
+  expect(await response.json()).toEqual({status:'ok',version:'0.4.0'})
   expect(response.headers.get('Cache-Control')).toBe('no-store')
   expect(response.headers.get('X-Content-Type-Options')).toBe('nosniff')
  })
@@ -19,7 +19,7 @@ describe('API boundary',()=>{
   expect(response.status).toBe(503)
  })
  it('rejects oversized input before processing it',async()=>{
-  const response=await app.request('/api/enrollments',{method:'POST',body:'x'.repeat(20000),headers:{'Content-Length':'20000'}})
+  const response=await app.request('/api/enrollments',{method:'POST',body:'x'.repeat(40000),headers:{'Content-Length':'40000'}})
   expect(response.status).toBe(413)
  })
  it('public intake fails closed without secret configuration and a limiter',async()=>{

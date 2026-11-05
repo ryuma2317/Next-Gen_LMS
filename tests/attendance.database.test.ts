@@ -15,7 +15,8 @@ beforeAll(async () => {
     create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
     create function auth.jwt() returns jsonb language sql stable as $$select jsonb_build_object('aal',coalesce(current_setting('request.jwt.claim.aal',true),'aal1'))$$;
     grant usage on schema auth to authenticated; grant execute on function auth.uid(),auth.jwt() to authenticated;`)
-  for (const file of ['202611050001_foundation.sql', '202611050002_admissions.sql', '202611050003_attendance.sql']) {
+  await db.exec('alter default privileges grant execute on functions to anon,authenticated,service_role')
+  for (const file of ['202611050001_foundation.sql', '202611050002_admissions.sql', '202611050003_attendance.sql', '202611050004_learning.sql', '202611050005_function_grants.sql']) {
     await db.exec(await readFile(new URL('../supabase/migrations/' + file, import.meta.url), 'utf8'))
   }
   await db.exec(`insert into auth.users(id) values('${teacher}'),('${trainee}'),('${leaveStudent}'),('${reviewer}'),('${outsider}');
@@ -45,10 +46,13 @@ it('only assigned trainers start a roster; outsider sessions and private roster 
 it('browser callers cannot bypass code verification; service recording is scoped and idempotent', async () => {
   const result = await db.query<{ generation: string }>(`select generation from public.teaching_sessions where id='${session}'`)
   const generation = result.rows[0].generation
-  await expect(asUser(trainee, `select public.record_session_checkin('${session}','${trainee}','${generation}')`)).rejects.toThrow()
-  await expect(asUser('', `select public.record_session_checkin('${session}','${outsider}','${generation}')`, 'service_role')).rejects.toThrow()
-  await expect(asUser('', `select public.record_session_checkin('${session}','${trainee}','${id('9')}')`, 'service_role')).rejects.toThrow()
-  await asUser('', `select public.record_session_checkin('${session}','${trainee}','${generation}');select public.record_session_checkin('${session}','${trainee}','${generation}');`, 'service_role')
+  await expect(asUser(trainee, `select public.record_session_checkin('${session}','${trainee}','${generation}',clock_timestamp()+interval '10 seconds')`)).rejects.toThrow()
+  await expect(asUser('', `select public.record_session_checkin('${session}','${outsider}','${generation}',clock_timestamp()+interval '10 seconds')`, 'service_role')).rejects.toThrow()
+  await expect(asUser('', `select public.record_session_checkin('${session}','${trainee}','${id('9')}',clock_timestamp()+interval '10 seconds')`, 'service_role')).rejects.toThrow()
+  await expect(asUser('', `select public.record_session_checkin('${session}','${trainee}','${generation}',clock_timestamp()-interval '1 second')`, 'service_role')).rejects.toThrow()
+  await expect(asUser('', `select public.record_session_checkin('${session}','${trainee}','${generation}',null)`, 'service_role')).rejects.toThrow()
+  await expect(asUser('', `select public.record_session_checkin('${session}','${trainee}','${generation}')`, 'service_role')).rejects.toThrow()
+  await asUser('', `select public.record_session_checkin('${session}','${trainee}','${generation}',clock_timestamp()+interval '10 seconds');select public.record_session_checkin('${session}','${trainee}','${generation}',clock_timestamp()+interval '10 seconds');`, 'service_role')
   const recorded = await db.query<{ status: string; version: number }>(`select status,version from public.session_attendance where user_id='${trainee}'`)
   expect(recorded.rows[0]).toEqual({ status: 'present', version: 2 })
   expect((await db.query("select * from public.attendance_events where action='attendance.checkin'")).rows).toHaveLength(1)

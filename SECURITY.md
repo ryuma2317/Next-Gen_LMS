@@ -58,6 +58,8 @@ Use narrowly scoped transactional functions for seat claims, quotas, ballots and
 
 Supabase secret/service-role credentials bypass normal protections and belong only in narrowly authorized server operations. Never place them in Vite/browser variables, URLs or logs. Server code using them must repeat resource authorization deliberately; RLS cannot be claimed as a guard for a bypassing path. Keep ordinary reads/writes in caller context where feasible.
 
+Migration 005 adds an explicit named-role EXECUTE allowlist for all 50 current application function signatures. Revoke from PUBLIC **and** named anon/authenticated/service_role roles before restoring intended access; provider default ACLs can grant named roles separately. Tests now simulate these defaults, but runtime execution is pending. Do not expose intake or attendance without applying/verifying the complete migration set. See the [Supabase advisory](https://supabase.com/docs/guides/observability/advisors?lint=0029_authenticated_security_definer_function_executable).
+
 ### SEC-04 — Atomic workflow integrity [P0; database/application]
 
 Use constraints plus transactions for capacity, membership uniqueness, room overlap, per-team quota, one ballot per verified voter and one award per team/category. Lock shared capacity/quota records as well as the requested slot. A count-then-insert across two API requests is unsafe.

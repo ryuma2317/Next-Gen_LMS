@@ -40,5 +40,5 @@ it('uses the verified actor and current database generation for a valid check-in
   const code = (await attendanceChallenge(environment.ATTENDANCE_SIGNING_KEY, id, generation, now)).code
   const response = await app.request(`/api/attendance/${id}/check-in`, { method: 'POST', headers, body: JSON.stringify({ code }) }, environment)
   expect(response.status).toBe(200)
-  expect(mocked.rpc).toHaveBeenCalledWith('record_session_checkin', { p_session: id, p_actor: actor, p_generation: generation })
+  expect(mocked.rpc).toHaveBeenCalledWith('record_session_checkin', { p_session: id, p_actor: actor, p_generation: generation, p_expires_at: new Date(now + 12000).toISOString() })
 })

@@ -22,10 +22,13 @@ export async function attendanceChallenge(secret: string, sessionId: string, gen
   const code = await codeFor(secret, sessionId, generation, step)
   return { code, qr: `nextgen-attendance:v1:${sessionId}:${code}`, serverTime: now, rotatesAt: (step + 1) * periodMs, expiresAt: (step + 2) * periodMs }
 }
-export async function verifyAttendanceCode(secret: string, sessionId: string, generation: string, code: string, now = Date.now()) {
-  if (!/^[0-9]{8}$/.test(code)) return false
+export async function attendanceCodeExpiry(secret: string, sessionId: string, generation: string, code: string, now = Date.now()): Promise<number | null> {
+  if (!/^[0-9]{8}$/.test(code)) return null
   const step = Math.floor(now / periodMs)
   const candidates = await Promise.all([codeFor(secret, sessionId, generation, step), codeFor(secret, sessionId, generation, step - 1)])
   const current = equalCode(code, candidates[0]), previous = equalCode(code, candidates[1])
-  return current || previous
+  return current ? (step + 2) * periodMs : previous ? (step + 1) * periodMs : null
+}
+export async function verifyAttendanceCode(secret: string, sessionId: string, generation: string, code: string, now = Date.now()) {
+  return (await attendanceCodeExpiry(secret, sessionId, generation, code, now)) !== null
 }

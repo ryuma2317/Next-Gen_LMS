@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { attendanceChallenge, verifyAttendanceCode } from '../server/challenges.ts'
+import { attendanceChallenge, attendanceCodeExpiry, verifyAttendanceCode } from '../server/challenges.ts'
 import { attendanceCondition, recordUnits, parseAttendanceQr } from '../shared/attendance.ts'
 const key = 'A'.repeat(43), session = '70000000-0000-0000-0000-000000000001', generation = 'generation-one'
 test('challenge rotates at six seconds and accepts only current/previous twelve-second window', async () => {
@@ -11,6 +11,8 @@ test('challenge rotates at six seconds and accepts only current/previous twelve-
   assert.equal(first.code, same.code); assert.notEqual(first.code, next.code)
   assert.equal(first.rotatesAt, 606000); assert.equal(first.expiresAt, 612000)
   assert.equal(await verifyAttendanceCode(key, session, generation, first.code, 611999), true)
+  assert.equal(await attendanceCodeExpiry(key, session, generation, first.code, 611999), 612000)
+  assert.equal(await attendanceCodeExpiry(key, session, generation, first.code, 612000), null)
   assert.equal(await verifyAttendanceCode(key, session, generation, first.code, 612000), false)
   assert.equal(await verifyAttendanceCode(key, session, generation, next.code, 600000), false)
 })

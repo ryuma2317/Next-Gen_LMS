@@ -2,7 +2,7 @@
 
 Updated: 2026-11-05. Companion to [SECURITY.md](SECURITY.md) and the [README operational runbook](README.md).
 
-**Execution status: NOT RUN for every full scenario below.** Initial application and test sources now exist; see [IMPLEMENTATION.md](IMPLEMENTATION.md). Fourteen dependency-free domain/validation/challenge tests provide narrow supporting evidence, but do not complete these end-to-end security scenarios. No database deployment or full security test run has occurred.
+**Execution status: NOT RUN for every full scenario below.** Initial application and test sources now exist; see [IMPLEMENTATION.md](IMPLEMENTATION.md). Twenty-one dependency-free domain/validation/challenge tests provide narrow supporting evidence, but do not complete these end-to-end security scenarios. No database deployment or full security test run has occurred. New regression sources include named default function grants, grading draft privacy and attendance expiry after lock waits.
 
 ## How to use this plan
 

@@ -1,6 +1,6 @@
 # GitHub issue queue
 
-These are prepared issue bodies, **not remotely created issues**. Initial writes returned 403; after reconnection the connector returns `Unknown tool`. Replace status/link fields with real issue URLs after creation. The combined initial source import uses isolated local branch `feat/lms-platform-admissions`; later features should each use an issue-linked branch.
+Issue bodies are prepared in `.github/handoff`. The connector recovered on 2026-11-05 and [verification issue #1](https://github.com/ryuma2317/Next-Gen_LMS/issues/1) now exists; see GIT_HANDOFF.md for the verified publication register as other issues/branches are created. Earlier 403/Unknown-tool failures are historical. The combined initial source import uses isolated local branch `feat/lms-platform-admissions`; attendance and learning use their respective stacked feature branches.
 
 ## Foundation: role workspaces, protected API and atomic subject selection
 
@@ -58,3 +58,9 @@ Each epic must cover authorized and forbidden actions, relevant race conditions,
 Branch: `feat/attendance-sessions`, stacked on the initial bootstrap. Isolated checkout: `tmp/attendance-handoff`. Prepared full issue bodies and acceptance criteria are in `.github/handoff/attendance.md` and `.github/handoff/review-null-version.md`. They are not remotely created issues until GitHub confirms creation.
 
 Attendance source now covers scheduling, scoped rosters, six-second QR/manual challenges, first-fifteen-minute check-in, leave review, corrections, finalization and provisional quarter-unit totals. Fourteen dependency-free tests pass; the integration checks remain blocked. A forward migration also rejects NULL revisions in the older review RPC; source/test evidence is recorded in IMPLEMENTATION.md. Keep all runtime-dependent acceptance criteria open.
+
+## Learning and forward security hardening
+
+Branch: `feat/learning-assignments`, stacked on attendance. Prepared issue bodies: `.github/handoff/learning.md`, `time-guards.md` and `function-grants.md`. Source covers lesson publication, explicitly configured individual assignments, immutable submissions, separately released grading, post-lock code expiry and named function-role grants. Latest narrow evidence: 21 passing dependency-free tests and 33 parsed TypeScript/TSX files. All runtime-dependent criteria remain open; the issue bodies are not remotely created issues yet.
+
+Remaining learning work includes quizzes, file/group submissions, server autosave/resumption, content revision/withdrawal, appeals/rubrics, larger catalogue pagination and approved transcript/certificate policy. Real multi-role workspace switching and all edition/section assignment administration also remain unfinished; SQL authorization is independent of preview labels.

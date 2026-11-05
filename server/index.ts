@@ -5,11 +5,12 @@ import { createClient } from '@supabase/supabase-js'
 import type { Env, Bindings } from './types'
 import { publicAdmissions, admissions, runInvitationJobs } from './admissions'
 import { attendance } from './attendance'
+import { learning } from './learning'
 export const app = new Hono<Env>()
 app.use('/api/*', secureHeaders({ referrerPolicy: 'no-referrer', xFrameOptions: 'DENY', permissionsPolicy: { camera: ['self'], microphone: [] } }))
 app.use('/api/*', async (c,next) => { c.header('Cache-Control','no-store'); await next() })
-app.use('/api/*', bodyLimit({ maxSize: 16384, onError: c => c.json({ error: 'Request too large' },413) }))
-app.get('/api/health', c => c.json({ status: 'ok', version: '0.3.0' }))
+app.use('/api/*', bodyLimit({ maxSize: 32768, onError: c => c.json({ error: 'Request too large' },413) }))
+app.get('/api/health', c => c.json({ status: 'ok', version: '0.4.0' }))
 app.route('/api/public',publicAdmissions)
 app.use('/api/*', async (c,next) => {
   const token = c.req.header('Authorization')?.match(/^Bearer ([^\s]+)$/)?.[1]
@@ -51,6 +52,7 @@ app.post('/api/enrollments', async c => {
 })
 app.route('/api',admissions)
 app.route('/api',attendance)
+app.route('/api',learning)
 app.notFound(c => c.json({ error: 'Not found' },404))
 app.onError((_error,c) => c.json({ error: 'Request failed' },500))
 export default { fetch: app.fetch, scheduled: (_event:unknown,env:Bindings,ctx:{waitUntil(promise:Promise<unknown>):void})=>ctx.waitUntil(runInvitationJobs(env)) }

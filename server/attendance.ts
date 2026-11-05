@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { createClient } from '@supabase/supabase-js'
 import type { Env } from './types'
 import { uuidPattern } from '../shared/admissions'
-import { attendanceChallenge, verifyAttendanceCode } from './challenges'
+import { attendanceChallenge, attendanceCodeExpiry } from './challenges'
 
 export const attendance = new Hono<Env>()
 const object = (value: unknown, keys: string[]): value is Record<string, unknown> => !!value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).sort().join(',') === keys.sort().join(',')
@@ -56,12 +56,12 @@ attendance.post('/attendance/:id/check-in', async c => {
   if (error) return c.json({ error: 'Unable to check attendance' }, 503)
   const context = data?.[0]
   if (!context || context.status !== 'open') return c.json({ error: 'Check-in is unavailable for this participant/session' }, 403)
-  let valid: boolean
-  try { valid = await verifyAttendanceCode(env.ATTENDANCE_SIGNING_KEY, id, context.generation, body.code) }
+  let expiresAt: number | null
+  try { expiresAt = await attendanceCodeExpiry(env.ATTENDANCE_SIGNING_KEY, id, context.generation, body.code) }
   catch { return c.json({ error: 'Check-in is not configured' }, 503) }
-  if (!valid) return c.json({ error: 'Code expired or invalid. Scan the current display or enter its new code.' }, 409)
+  if (expiresAt === null) return c.json({ error: 'Code expired or invalid. Scan the current display or enter its new code.' }, 409)
   const db = createClient(env.SUPABASE_URL!, env.SUPABASE_SECRET_KEY, { auth: { persistSession: false, autoRefreshToken: false } })
-  const saved = await db.rpc('record_session_checkin', { p_session: id, p_actor: c.get('userId'), p_generation: context.generation })
+  const saved = await db.rpc('record_session_checkin', { p_session: id, p_actor: c.get('userId'), p_generation: context.generation, p_expires_at: new Date(expiresAt).toISOString() })
   return saved.error ? c.json({ error: 'Check-in closed or unavailable. Ask the trainer to verify attendance.' }, 409) : c.json({ status: 'present' })
 })
 attendance.post('/attendance/:id/:action', async c => {

@@ -1,10 +1,10 @@
 [CmdletBinding()]
-param([ValidateSet('bootstrap','attendance')][string]$Feature = 'bootstrap')
+param([ValidateSet('bootstrap','attendance','learning')][string]$Feature = 'bootstrap')
 $ErrorActionPreference = 'Stop'
 $repository = 'ryuma2317/Next-Gen_LMS'
-$branch = if ($Feature -eq 'attendance') { 'feat/attendance-sessions' } else { 'feat/lms-platform-admissions' }
-$baseBranch = if ($Feature -eq 'attendance') { 'feat/lms-platform-admissions' } else { 'main' }
-$checkoutName = if ($Feature -eq 'attendance') { 'attendance-handoff' } else { 'git-handoff' }
+$branch = switch ($Feature) { 'learning' { 'feat/learning-assignments' } 'attendance' { 'feat/attendance-sessions' } default { 'feat/lms-platform-admissions' } }
+$baseBranch = switch ($Feature) { 'learning' { 'feat/attendance-sessions' } 'attendance' { 'feat/lms-platform-admissions' } default { 'main' } }
+$checkoutName = switch ($Feature) { 'learning' { 'learning-handoff' } 'attendance' { 'attendance-handoff' } default { 'git-handoff' } }
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $handoff = Join-Path $projectRoot "tmp\$checkoutName"
 if (Test-Path -LiteralPath (Join-Path $projectRoot '.git')) {
@@ -20,7 +20,7 @@ $dirty = & git -C $handoff status --porcelain
 if ($LASTEXITCODE -ne 0 -or $dirty) { throw 'Prepared checkout has uncommitted changes. Review and commit them before publishing.' }
 & gh auth status --hostname github.com
 if ($LASTEXITCODE -ne 0) { throw 'Sign in with gh auth login in this normal PowerShell window first.' }
-if ($Feature -eq 'attendance') {
+if ($Feature -ne 'bootstrap') {
     $baseCommit = & git -C $handoff rev-parse --verify "refs/remotes/origin/$baseBranch"
     if ($LASTEXITCODE -ne 0) { throw 'Prepared bootstrap base ref missing. Inspect the branch stack before publishing.' }
     & git -C $handoff push origin "${baseCommit}:refs/heads/$baseBranch"
@@ -51,6 +51,14 @@ if ($Feature -eq 'attendance') {
     $attendanceIssue = Get-OrCreateIssue 'Attendance: rotating check-in, rosters, leave and provisional eligibility' (Join-Path $bodyRoot 'attendance.md')
     $revisionIssue = Get-OrCreateIssue 'Bug: reject NULL revisions in direct review RPC calls' (Join-Path $bodyRoot 'review-null-version.md')
 }
+$learningIssue = $null
+$timingIssue = $null
+$grantIssue = $null
+if ($Feature -eq 'learning') {
+    $learningIssue = Get-OrCreateIssue 'Learning: lessons, assignments, submissions and released grading' (Join-Path $bodyRoot 'learning.md')
+    $timingIssue = Get-OrCreateIssue 'Bug: enforce attendance expiry after database lock waits' (Join-Path $bodyRoot 'time-guards.md')
+    $grantIssue = Get-OrCreateIssue 'Security: revoke named default grants on server-only RPCs' (Join-Path $bodyRoot 'function-grants.md')
+}
 $prRaw = & gh pr list --repo $repository --head $branch --base $baseBranch --state open --json url
 if ($LASTEXITCODE -ne 0) { throw 'Could not check existing pull requests.' }
 $existingPr = @($prRaw | ConvertFrom-Json)
@@ -79,6 +87,23 @@ if ($Feature -eq 'attendance') {
         'Codes rotate every six seconds with at most twelve-second validity. Verified expected participants can check in only during the first fifteen minutes and before session end. Leave approval requires explicit permission and MFA; revision checks, corrections and finalization are audited.',
         '',
         'Evidence: 14 dependency-free tests pass; 26 TypeScript/TSX files parse. Full type check/build, API/database/browser/camera and multi-connection tests remain unverified because package installation is blocked. Keep draft. No real data/deployment; attendance passing alone is not certificate eligibility.'
+    ) -join [Environment]::NewLine
+}
+if ($Feature -eq 'learning') {
+    $prTitle = 'Add class lessons, configured assignments and released grading'
+    $body = @(
+        'Add scoped lesson drafts/publication, assignment policy configuration, immutable submitted versions and separately released grading.',
+        '',
+        "References #$learningIssue, #$timingIssue, #$grantIssue and #$verification. Keep issues open until acceptance criteria pass.",
+        '',
+        'Stacked on feat/attendance-sessions. Publish the bootstrap and attendance PRs first using their respective script options. This PR does not complete the LMS.',
+        '',
+        'Editing and grading require explicit section capabilities plus MFA; no permissions are granted automatically. Account settings support initial authenticator enrollment with local QR rendering and explicit verification; provider/recovery checks remain pending. Published rules stay fixed. Learners see only their own submissions and last released score/feedback, with draft revisions kept private.',
+        '',
+        'A forward migration also enforces verified attendance-code expiry at the database write after row-lock waits, and uses wall-clock receipt times for assignment deadlines. Deploy the matching Worker/migration together; old attendance recording fails closed.',
+        'Apply all migrations through 005: its explicit function ACL allowlist removes named default-role grants that a PUBLIC-only revoke cannot remove. Provider-style defaults are simulated in the pending database regression tests.',
+        '',
+        'Evidence: 21 dependency-free tests pass; 33 TypeScript/TSX files parse. Full type check/build, API/PostgreSQL/browser/device and multi-connection tests remain unverified because installation is blocked. No deployment or real records. Keep draft.'
     ) -join [Environment]::NewLine
 }
 $temporaryDirectory = Join-Path $handoff 'tmp'

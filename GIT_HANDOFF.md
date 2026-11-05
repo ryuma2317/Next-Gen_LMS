@@ -1,5 +1,7 @@
 # Git handover result
 
+Latest status (2026-11-05): the GitHub connector recovered and [verification issue #1](https://github.com/ryuma2317/Next-Gen_LMS/issues/1) was created successfully. Publication of the prepared branches is in progress. Earlier failed attempts below are retained as history; shell access and connector access are separate paths.
+
 Repository: `ryuma2317/Next-Gen_LMS`.
 
 Prepared checkout: `D:\CADT\LMS_Next-Gen\tmp\git-handoff`.
@@ -38,3 +40,15 @@ After publishing the bootstrap with the default invocation above, publish the st
 ```
 
 This invocation normally pushes the known base and attendance branch, creates/reuses the original issues plus attendance/NULL-revision bug issues, and opens a draft attendance PR targeting the bootstrap branch. Normal pushes reject divergent remote changes; there is no force-push or merge. These are prepared commands, not claims that GitHub accepted anything.
+
+## Learning feature branch
+
+The next increment is isolated in `tmp/learning-handoff` on `feat/learning-assignments`, based on the attendance commit. It adds lessons, configured individual assignments, immutable submissions, separate grade release and forward timing/permission fixes. Narrow checks: 21 dependency-free tests, 33 parsed TypeScript/TSX files and static coverage of all 50 application function signatures by migration 005's explicit revocations. Full runtime verification remains pending.
+
+After publishing the preceding branches, the prepared command is:
+
+```powershell
+& 'D:\CADT\LMS_Next-Gen\scripts\publish-handoff.ps1' -Feature learning
+```
+
+It targets a draft PR against the attendance branch and creates/reuses learning, timing and function-grant issue criteria. These are prepared steps only; no remote creation is claimed. Apply the complete migration set through 005 with the matching Worker before enabling any live features; do not deploy older unverified branches alone as a finished LMS.

@@ -1,0 +1,42 @@
+import { test, expect } from '@playwright/test'
+async function navigate(page: import('@playwright/test').Page) {
+  const menu = page.getByRole('button', { name: 'Open navigation' })
+  if (await menu.isVisible()) await menu.click()
+  await page.getByRole('navigation').getByRole('button', { name: 'Learning', exact: true }).click()
+}
+test('trainee reads lessons and submits code as inert text with retry protection', async ({ page }) => {
+  await page.goto('/'); await navigate(page)
+  await expect(page.getByRole('heading', { name: 'Your first page on the web' })).toBeVisible()
+  await page.getByRole('button', { name: 'Assignments', exact: true }).click()
+  const source = '<img src=x onerror="window.learningPwned=1">'
+  await page.getByLabel('Your response', { exact: true }).fill(source)
+  await page.getByRole('button', { name: 'Submit work', exact: true }).click()
+  await expect(page.locator('.submitted-work')).toContainText(source)
+  expect(await page.evaluate(() => (window as unknown as Record<string, unknown>).learningPwned)).toBeUndefined()
+  await page.getByRole('button', { name: 'Submit work', exact: true }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'already saved' })).toBeVisible()
+})
+test('trainer saves a lesson draft and publishes it deliberately', async ({ page }) => {
+  await page.goto('/'); await page.getByLabel('Preview as').selectOption('Trainer'); await navigate(page)
+  await page.getByRole('button', { name: 'New lesson' }).click()
+  await page.getByLabel('Lesson title').fill('A sample draft lesson')
+  await page.getByLabel('Lesson text').fill('Review this material before publishing.')
+  await page.getByRole('button', { name: 'Save lesson draft' }).click()
+  await expect(page.getByRole('heading', { name: 'A sample draft lesson' })).toBeVisible()
+  await page.getByRole('button', { name: 'Publish lesson', exact: true }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'Sample lesson published' })).toBeVisible()
+})
+test('trainer drafts a score before a separate reasoned release', async ({ page }) => {
+  await page.goto('/'); await page.getByLabel('Preview as').selectOption('Trainer'); await navigate(page)
+  await page.getByRole('button', { name: 'Assignments', exact: true }).click()
+  await page.getByRole('button', { name: 'Grade latest version' }).click()
+  await page.getByLabel('Score', { exact: true }).fill('76.50')
+  await page.getByLabel('Feedback', { exact: true }).fill('Clear structure; add more explanation.')
+  await page.getByLabel('Reason for grade change').fill('Reviewed the submitted work')
+  await page.getByRole('button', { name: 'Save grade draft' }).click()
+  await expect(page.locator('.submitted-work')).toContainText('Current grade draft: 76.50')
+  await expect(page.getByRole('button', { name: 'Release score and feedback' })).toBeDisabled()
+  await page.getByLabel('Release reason for River Demo version 1').fill('Checked score and feedback')
+  await page.getByRole('button', { name: 'Release score and feedback' }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'Sample grade released' })).toBeVisible()
+})
