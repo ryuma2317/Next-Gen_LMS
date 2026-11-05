@@ -8,6 +8,7 @@ Development workspace for the yearly CADT Next-Gen Engagement program. Build 0.4
 | --- | --- |
 | [LMS_PLAN.md](LMS_PLAN.md) | Program requirements, architecture and delivery plan. |
 | [UX_BLUEPRINT.md](UX_BLUEPRINT.md) | User workspaces, journeys and scenario coverage. |
+| [QUIZZES.md](QUIZZES.md) | Exam/live-game requirements, implementation bounds and monitoring limits. |
 | [PROGRAM_RULES.md](PROGRAM_RULES.md) | Confirmed rules, delegated attendance defaults, jury and voting design. |
 | [STACK_AND_BUDGET.md](STACK_AND_BUDGET.md) | Current cost-conscious stack and sponsor-funded operating estimate. |
 | [DISCOVERY_QUESTIONS.md](DISCOVERY_QUESTIONS.md) | Answers received, remaining decisions and deferred integrations. |
@@ -27,9 +28,9 @@ With Node 22.12+ and npm registry access, run `npm.cmd ci` then `npm.cmd run dev
 
 Local package installation remains blocked, but GitHub Actions generated the reviewed dependency lock and has installed packages and passed type checking. Twenty-one dependency-free tests passed locally and in CI. The complete rerun on the verification branch passed 21 domain tests, 37 API/PGlite tests, the client/Worker build and 16 Chromium browser tests after migration 006 fixed two database defects. Evidence and remaining live-integration limits are recorded in IMPLEMENTATION.md.
 
-Account settings include initial authenticator enrollment and verification sources; provider testing is pending. Initial learning sources now include lesson drafts, configured individual text/link assignments, immutable submissions and separately released grading. Quizzes, file/group submissions, complete disputes/certificates, projects/rooms, jury/voting and administration workflows remain unfinished.
+Account settings include initial authenticator enrollment and verification sources; provider testing is pending. Initial learning sources now include lesson drafts, configured individual text/link assignments, immutable submissions and separately released grading. Initial exam/live-game quiz sources are under verification; see QUIZZES.md. Broader quiz formats, file/group submissions, complete disputes/certificates, projects/rooms, jury/voting and administration workflows remain unfinished.
 
-**Current setup requires every migration through `202611050006_runtime_database.sql`.** The latest Worker and migrations 004/005/006 must be deployed together in the reviewed development/release process. Migration 004 replaces the attendance recording interface; 005 explicitly restricts named-role function grants. Earlier increment setup notes are historical and do not establish readiness to expose live intake or check-in.
+**Current setup requires every migration through `202611050009_quiz_games.sql`.** The latest Worker and migrations 004/005/006 must be deployed together in the reviewed development/release process. Migration 004 replaces the attendance recording interface; 005 explicitly restricts named-role function grants. Earlier increment setup notes are historical and do not establish readiness to expose live intake or check-in.
 
 ## Current direction
 

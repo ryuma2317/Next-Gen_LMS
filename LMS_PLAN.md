@@ -108,7 +108,7 @@ Only admin and super admin are explicitly identified as able to override partici
 
 - Lessons and learning materials.
 - Assignments.
-- Quizzes.
+- Two quiz modes: monitored fullscreen-request exams and teacher-hosted live games, with teacher answer keys and server-side automatic grading. Explicit settings and browser limits are documented in QUIZZES.md.
 - Attendance.
 - Certificates.
 - Participant enrollment and class enrollment for both trainees and trainers.

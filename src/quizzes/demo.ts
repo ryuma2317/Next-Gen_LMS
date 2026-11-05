@@ -1,0 +1,9 @@
+import { emptyQuizConfig, type Question, type QuizConfig, type QuizDraft, type QuizSummary } from '../../shared/quizzes'
+export type ListedQuiz = QuizSummary & { can_edit: boolean; can_report: boolean; can_participate: boolean }
+export type EditableQuiz = QuizDraft & { id: string; version: number }
+export const sampleSection = '30000000-0000-0000-0000-000000000001'
+export const sampleQuestion: Question = { id: 'q_sample', kind: 'single', prompt: 'What does HTML describe?', points: 10, options: [{ id: 'structure', text: 'The structure of a web page' }, { id: 'network', text: 'A wireless network password' }], correct: ['structure'] }
+export const sampleConfig = (): QuizConfig => ({ ...emptyQuizConfig(), opens_at: new Date(Date.now()-3600000).toISOString(), closes_at: new Date(Date.now()+3600000).toISOString(), duration_seconds: 600, max_attempts: 2, results: 'immediate', monitoring: 'fullscreen_visibility', focus_response: 'warn_report', question_seconds: 20, scoring: 'correct', speed_bonus_percent: 0, leaderboard: 'each_question' })
+export const sampleQuizzes = (teacher: boolean, student: boolean): ListedQuiz[] => (['exam','game'] as const).map((mode,i)=>({ id:'90000000-0000-0000-0000-00000000000'+(i+1),section_id:sampleSection,title:mode==='exam'?'Web fundamentals exam':'Web fundamentals live game',description:'Fictional sample quiz. Preview scores are local examples; no real assessment is sent.',mode,config:sampleConfig(),state:'published',version:2,released:false,can_edit:teacher,can_report:teacher,can_participate:student }))
+export const scoreText = (n: number | null) => n===null?'Not released':(n/100).toLocaleString('en-GB',{maximumFractionDigits:2})
+export const newQuestion = (): Question => ({id:'q'+crypto.randomUUID().replaceAll('-',''),kind:'single',prompt:'',points:10,options:[{id:'o'+crypto.randomUUID().replaceAll('-',''),text:''},{id:'o'+crypto.randomUUID().replaceAll('-',''),text:''}],correct:[]})

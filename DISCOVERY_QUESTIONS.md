@@ -113,7 +113,7 @@ See PROGRAM_RULES.md for guest-jury access, source-backed browser/network limita
 | E3 | Is trainer supervision plus authenticated QR/code check-in sufficient, knowing that codes can be shared live? Any additional presence checks must be explicitly selected. | Pending |
 | E4 | Which lesson formats are needed: text, PDF, slides, links, downloads, or video? What maximum upload size and approximate file volume should we plan for? | Pending |
 | E5 | Are assignments individual, group, or both? File/text/link submissions? Resubmissions, late work, rubrics, grade appeals, and draft/published grades? | Pending |
-| E6 | Which quiz question types are needed? Timers, attempt limits, randomization, autosave, automatic grading, manual grading, and simultaneous exam sizes? | Pending |
+| E6 | Owner confirmed exam-style fullscreen/tab-event reporting and Kahoot-style games; teachers author keys and results are auto-graded. Initial implementation supports single/multiple choice with explicit settings (QUIZZES.md). Preferred release/scoring/monitoring response, broader question types, accommodations, randomization and real concurrent exam load remain open. | Two modes and automatic grading confirmed; remaining policy/preferences pending |
 | E7 | Page 29 promises trainees an e-certificate of participation; page 25 gives an absence-based exclusion. Do other roles receive certificates, what other criteria apply, and who approves/signs/verifies/revokes them? | Trainee certificate type supplied; broader policy pending |
 
 ## F. Projects and facilities

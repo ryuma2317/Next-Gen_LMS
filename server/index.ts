@@ -6,6 +6,7 @@ import type { Env, Bindings } from './types'
 import { publicAdmissions, admissions, runInvitationJobs } from './admissions'
 import { attendance } from './attendance'
 import { learning } from './learning'
+import { quizzes } from './quizzes'
 export const app = new Hono<Env>()
 app.use('/api/*', secureHeaders({ referrerPolicy: 'no-referrer', xFrameOptions: 'DENY', permissionsPolicy: { camera: ['self'], microphone: [] } }))
 app.use('/api/*', async (c,next) => { c.header('Cache-Control','no-store'); await next() })
@@ -53,6 +54,7 @@ app.post('/api/enrollments', async c => {
 app.route('/api',admissions)
 app.route('/api',attendance)
 app.route('/api',learning)
+app.route('/api',quizzes)
 app.notFound(c => c.json({ error: 'Not found' },404))
 app.onError((_error,c) => c.json({ error: 'Request failed' },500))
 export default { fetch: app.fetch, scheduled: (_event:unknown,env:Bindings,ctx:{waitUntil(promise:Promise<unknown>):void})=>ctx.waitUntil(runInvitationJobs(env)) }

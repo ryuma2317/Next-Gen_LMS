@@ -66,3 +66,7 @@ Branch: `feat/learning-assignments`, stacked on attendance. Prepared issue bodie
 Remaining learning work includes quizzes, file/group submissions, server autosave/resumption, content revision/withdrawal, appeals/rubrics, larger catalogue pagination and approved transcript/certificate policy. Real multi-role workspace switching and all edition/section assignment administration also remain unfinished; SQL authorization is independent of preview labels.
 
 CI runtime fixes are tracked in [#13](https://github.com/ryuma2317/Next-Gen_LMS/issues/13), alongside dependency verification [#1](https://github.com/ryuma2317/Next-Gen_LMS/issues/1). Migration 006 fixes admissions SQL ambiguity and leave-read RLS without widening direct table access. See IMPLEMENTATION.md for actual rerun evidence.
+
+## Exam and live-game quizzes
+
+[Issue #16](https://github.com/ryuma2317/Next-Gen_LMS/issues/16), branch feat/quiz-modes from dev. Source increment covers teacher authoring/keys, explicit publication settings, timed exam saves/automatic grading, advisory fullscreen/visibility reports and live-game hosting/locked answers/standings. See QUIZZES.md for known limits, pending policy, operational testing and implementation bounds. Keep acceptance criteria open until actual evidence is attached.
