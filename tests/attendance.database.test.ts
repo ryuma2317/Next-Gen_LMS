@@ -16,7 +16,7 @@ beforeAll(async () => {
     create function auth.jwt() returns jsonb language sql stable as $$select jsonb_build_object('aal',coalesce(current_setting('request.jwt.claim.aal',true),'aal1'))$$;
     grant usage on schema auth to authenticated; grant execute on function auth.uid(),auth.jwt() to authenticated;`)
   await db.exec('alter default privileges grant execute on functions to anon,authenticated,service_role')
-  for (const file of ['202611050001_foundation.sql', '202611050002_admissions.sql', '202611050003_attendance.sql', '202611050004_learning.sql', '202611050005_function_grants.sql']) {
+  for (const file of ['202611050001_foundation.sql', '202611050002_admissions.sql', '202611050003_attendance.sql', '202611050004_learning.sql', '202611050005_function_grants.sql','202611050006_runtime_database.sql']) {
     await db.exec(await readFile(new URL('../supabase/migrations/' + file, import.meta.url), 'utf8'))
   }
   await db.exec(`insert into auth.users(id) values('${teacher}'),('${trainee}'),('${leaveStudent}'),('${reviewer}'),('${outsider}');
@@ -61,10 +61,15 @@ it('leave stays pending until an assigned MFA reviewer acts; notes are not discl
   await asUser(leaveStudent, `select public.request_session_leave('${session}','Synthetic permission request')`)
   const notes = await asUser(teacher, 'select * from public.session_leave_requests')
   expect(notes[0].rows).toHaveLength(0)
+  expect((await asUser(leaveStudent, 'select * from public.session_leave_requests'))[0].rows).toHaveLength(1)
+  expect((await asUser(outsider, 'select * from public.session_leave_requests'))[0].rows).toHaveLength(0)
+  expect((await asUser(reviewer, 'select * from public.session_leave_requests'))[0].rows).toHaveLength(0)
   const request = await db.query<{ id: string }>('select id from public.session_leave_requests')
   const requestId = request.rows[0].id
   await expect(asUser(reviewer, `select public.review_session_leave('${requestId}',1,true,'Reviewed')`)).rejects.toThrow()
   await db.exec("select set_config('request.jwt.claim.aal','aal2',false)")
+  expect((await asUser(reviewer, 'select * from public.session_leave_requests'))[0].rows).toHaveLength(1)
+  await expect(asUser(teacher, 'select * from public.teaching_sessions')).rejects.toThrow()
   await expect(asUser(teacher, `select public.review_session_leave('${requestId}',1,true,'Reviewed')`)).rejects.toThrow()
   await expect(asUser(reviewer, `select public.review_session_leave('${requestId}',null,true,'Reviewed')`)).rejects.toThrow()
   await asUser(reviewer, `select public.review_session_leave('${requestId}',1,true,'Permission verified')`)

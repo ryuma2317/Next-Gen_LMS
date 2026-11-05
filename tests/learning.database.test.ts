@@ -18,7 +18,7 @@ beforeAll(async () => {
     create function auth.jwt() returns jsonb language sql stable as $$select jsonb_build_object('aal',coalesce(current_setting('request.jwt.claim.aal',true),'aal1'))$$;
     grant usage on schema auth to authenticated;grant execute on function auth.uid(),auth.jwt() to authenticated;`)
   await db.exec('alter default privileges grant execute on functions to anon,authenticated,service_role')
-  for (const name of ['202611050001_foundation.sql', '202611050002_admissions.sql', '202611050003_attendance.sql', '202611050004_learning.sql', '202611050005_function_grants.sql']) {
+  for (const name of ['202611050001_foundation.sql', '202611050002_admissions.sql', '202611050003_attendance.sql', '202611050004_learning.sql', '202611050005_function_grants.sql','202611050006_runtime_database.sql']) {
     if (name === '202611050005_function_grants.sql') {
       const before = await db.query<{ browser_checkin: boolean; public_submit: boolean }>("select has_function_privilege('authenticated','public.record_session_checkin(uuid,uuid,uuid,timestamptz)','EXECUTE') as browser_checkin,has_function_privilege('anon','public.submit_application(uuid,uuid,text,text,text,text,text,jsonb)','EXECUTE') as public_submit")
       namedDefaultGrantsPresent = before.rows[0].browser_checkin && before.rows[0].public_submit
