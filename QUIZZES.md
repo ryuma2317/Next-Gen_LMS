@@ -46,8 +46,10 @@ The first live transport polls every two seconds with a single in-flight poll pe
 
 ## Verification and handover
 
-Apply the complete migrations through 009 with matching API/client sources in an isolated development project. New functions explicitly revoke PUBLIC and named anon/authenticated/service_role defaults before restoring intended callers. Keep service secrets out of the client. Do not deploy older partial migration sets as a finished quiz service.
+Apply the complete migrations through 010 with matching API/client sources in an isolated development project. New functions explicitly revoke PUBLIC and named anon/authenticated/service_role defaults before restoring intended callers. Keep service secrets out of the client. Do not deploy older partial migration sets as a finished quiz service.
 
 New tests cover domain validation/grading, API field restrictions, named grants, draft/key privacy, class scope/MFA, stale versions, expiry/attempt limits, monitoring idempotency and live answer locking/reveal. Browser tests use synthetic data and simulated fullscreen for deterministic UI checks; actual browser/device behavior, provider integration, independent security review, network interruptions and separate-connection contention still need evidence.
 
 Pending owner preferences were asked asynchronously: preferred exam release, game scoring and monitoring response. Explicit per-quiz teacher selection avoids silently choosing these policies. Latest actual check/PR/merge evidence belongs in IMPLEMENTATION.md and GIT_HANDOFF.md.
+
+Migration 010 replaces the provisional scalar-set quiz list with an explicit JSON array and notifies PostgREST to reload its schema. The API rejects unexpected envelopes instead of passing malformed collections into the interface. Verify the real provider RPC shapes during live integration; PGlite alone tests SQL results, not the HTTP gateway.

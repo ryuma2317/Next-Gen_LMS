@@ -13,7 +13,7 @@ quizzes.use('*', async (c, next) => {
 quizzes.get('/sections/:id/quizzes', async c => {
   if (!id(c.req.param('id'))) return c.json({ error: 'Invalid class' }, 400)
   const r = await c.get('db').rpc('quiz_list', { p_section: c.req.param('id') })
-  return r.error ? c.json({ error: 'Quiz list unavailable' }, 503) : c.json(r.data)
+  return r.error || !Array.isArray(r.data) ? c.json({ error: 'Quiz list unavailable' }, 503) : c.json(r.data)
 })
 quizzes.post('/sections/:id/quizzes', async c => {
   const b: unknown = await c.req.json().catch(() => null)

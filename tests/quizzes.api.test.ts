@@ -29,3 +29,7 @@ it('rejects unknown/prototype resources and unbounded report pages',async()=>{
  expect((await app.request('/api'+path,{headers},env)).status).toBeGreaterThanOrEqual(400)
  expect(mocked.rpc).not.toHaveBeenCalled()
 })
+it('fails closed for an unexpected quiz-list database envelope',async()=>{
+ mocked.rpc.mockResolvedValue({data:{quiz_list:[]},error:null})
+ expect((await app.request('/api/sections/'+id+'/quizzes',{headers},env)).status).toBe(503)
+})

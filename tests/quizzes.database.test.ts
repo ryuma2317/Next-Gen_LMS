@@ -25,13 +25,14 @@ it('restricts direct tables/private functions and named default execute grants',
 it('keeps drafts/keys private and requires assigned editing permission/MFA and full publishing policy',async()=>{
  await expect(asUser(teacher,'select public.save_quiz($1,$2,0,$3)',[exam,section,JSON.stringify(fields())],'aal1')).rejects.toThrow()
  await asUser(teacher,'select public.save_quiz($1,$2,0,$3)',[exam,section,JSON.stringify(fields())])
- expect((await asUser(student,'select * from public.quiz_list($1)',[section])).rows).toHaveLength(0)
+ expect((await asUser(student,'select * from public.quiz_list($1)',[section])).rows[0].quiz_list).toEqual([])
  await expect(asUser(student,'select public.quiz_definition($1)',[exam])).rejects.toThrow()
  await expect(asUser(teacher,"select public.quiz_transition($1,null,'publish','Ready')",[exam])).rejects.toThrow()
  await asUser(teacher,"select public.quiz_transition($1,1,'publish','Reviewed all settings')",[exam])
  const list=await asUser(student,'select * from public.quiz_list($1)',[section])
- expect(Object.keys(list.rows[0].quiz_list).sort()).toEqual(['id','section_id','title','description','mode','config','state','version','released','can_edit','can_report','can_participate'].sort())
- expect(list.rows[0].quiz_list).not.toHaveProperty('questions')
+ expect(list.rows[0].quiz_list).toHaveLength(1)
+ expect(Object.keys(list.rows[0].quiz_list[0]).sort()).toEqual(['id','section_id','title','description','mode','config','state','version','released','can_edit','can_report','can_participate'].sort())
+ expect(list.rows[0].quiz_list[0]).not.toHaveProperty('questions')
  await expect(asUser(teacher,'select public.save_quiz($1,$2,2,$3)',[exam,section,JSON.stringify(fields())])).rejects.toThrow()
 })
 it('starts/resumes own attempts with server timing, no keys and cross-class denial',async()=>{

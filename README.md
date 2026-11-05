@@ -30,7 +30,7 @@ Local package installation remains blocked, but GitHub Actions generated the rev
 
 Account settings include initial authenticator enrollment and verification sources; provider testing is pending. Initial learning sources now include lesson drafts, configured individual text/link assignments, immutable submissions and separately released grading. Initial exam/live-game quiz sources are under verification; see QUIZZES.md. Broader quiz formats, file/group submissions, complete disputes/certificates, projects/rooms, jury/voting and administration workflows remain unfinished.
 
-**Current setup requires every migration through `202611050009_quiz_games.sql`.** The latest Worker and migrations 004/005/006 must be deployed together in the reviewed development/release process. Migration 004 replaces the attendance recording interface; 005 explicitly restricts named-role function grants. Earlier increment setup notes are historical and do not establish readiness to expose live intake or check-in.
+**Current setup requires every migration through `202611050010_quiz_list_contract.sql`.** The latest Worker and migrations 004/005/006 must be deployed together in the reviewed development/release process. Migration 004 replaces the attendance recording interface; 005 explicitly restricts named-role function grants. Earlier increment setup notes are historical and do not establish readiness to expose live intake or check-in.
 
 ## Current direction
 
