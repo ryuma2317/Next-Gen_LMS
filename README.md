@@ -17,6 +17,7 @@ Development workspace for the yearly CADT Next-Gen Engagement program. Build 0.2
 | [IMPLEMENTATION.md](IMPLEMENTATION.md) | Current code, setup commands, verification limits and next implementation steps. |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Issue, branch, review, commit and push workflow. |
 | [BACKLOG.md](BACKLOG.md) | Prepared issues and acceptance criteria; not yet created remotely. |
+| [GIT_HANDOFF.md](GIT_HANDOFF.md) | Actual local commits, failed push evidence and a publishing script for normal PowerShell. |
 
 ## Run the initial build
 

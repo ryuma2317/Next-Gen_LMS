@@ -24,3 +24,5 @@ Repository: https://github.com/ryuma2317/Next-Gen_LMS
 - Prepared issue descriptions and acceptance criteria are in BACKLOG.md. They must be created remotely after GitHub access is fixed; local descriptions are not GitHub issues.
 
 Resolve the GitHub app's contents/issues/pull-request write permissions for this repository. Local Git metadata also needs writable access for local branching/commits, or use an authorized GitHub API workflow that checks the expected remote head before advancing a ref. Never force-push over another person's work. No push/commit/issue creation is claimed until confirmed by GitHub.
+
+Update: two actual local commits were prepared in the isolated checkout (`26322a6` documentation and `3471ed8` application sources), followed by publishing-runbook/script work. Direct push failed before authentication because this session could not connect to GitHub port 443. No remote push or issue creation succeeded. See [GIT_HANDOFF.md](GIT_HANDOFF.md) for the reviewable publishing script and exact status. Future repository permissions need not be broadened merely to fix an unavailable connector or blocked network.
