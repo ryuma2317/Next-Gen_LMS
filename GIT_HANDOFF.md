@@ -24,3 +24,15 @@ To publish outside the restricted session, open a normal PowerShell terminal and
 ```
 
 The script verifies checkout/branch/origin/clean state, checks GitHub CLI authentication, performs a normal branch push, creates/reuses three issues with acceptance criteria and opens/reuses a draft PR. It leaves main unchanged. Review the script before running. It needs Git/gh network access and authenticated write permission; it does not collect credentials or change machine execution policy. If machine policy blocks scripts, use the normal approved script-execution process rather than disabling machine security globally.
+
+## Attendance feature branch
+
+Attendance source is prepared separately in `tmp/attendance-handoff` on `feat/attendance-sessions`, based on the bootstrap commit. The original bootstrap checkout remains on `feat/lms-platform-admissions`; no branch needs to overwrite the other. This increment has 14 passing dependency-free tests and 26 parsed TypeScript/TSX files; full build/integration/camera verification remains blocked.
+
+After publishing the bootstrap with the default invocation above, publish the stacked attendance branch with:
+
+```powershell
+& 'D:\CADT\LMS_Next-Gen\scripts\publish-handoff.ps1' -Feature attendance
+```
+
+This invocation normally pushes the known base and attendance branch, creates/reuses the original issues plus attendance/NULL-revision bug issues, and opens a draft attendance PR targeting the bootstrap branch. Normal pushes reject divergent remote changes; there is no force-push or merge. These are prepared commands, not claims that GitHub accepted anything.

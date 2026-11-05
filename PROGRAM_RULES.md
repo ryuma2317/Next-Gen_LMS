@@ -1,7 +1,7 @@
 ﻿# Next-Gen Engagement — Attendance and Competition Rules
 
 Updated: 2026-11-04
-Status: Planning specification. Confirmed owner decisions are distinguished from selected attendance defaults and unresolved competition rules. No application code has been implemented.
+Status: Program specification. Confirmed owner decisions are distinguished from delegated attendance defaults and unresolved competition rules. Initial attendance/admissions source exists; see IMPLEMENTATION.md for the exact scope and pending runtime verification. This file is not evidence that every rule is already implemented.
 
 ## 1. Confirmed owner decisions
 

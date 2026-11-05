@@ -6,3 +6,5 @@ SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SECRET_KEY=
 ENABLE_INVITATIONS=false
 INVITE_REDIRECT_URL=
+# Generate 32 random bytes as base64url. Server only; never put in VITE variables.
+ATTENDANCE_SIGNING_KEY=

@@ -1,6 +1,6 @@
 # Next-Gen Engagement Platform
 
-Development workspace for the yearly CADT Next-Gen Engagement program. Build 0.2 includes initial React screens, protected APIs and migrations for selection and admissions. Live configuration and verification remain pending; it is not ready for real participants.
+Development workspace for the yearly CADT Next-Gen Engagement program. Build 0.3 includes initial screens, APIs and migrations for selection, admissions and session attendance/leave. Live configuration and verification remain pending; it is not ready for real participants.
 
 ## Start here
 
@@ -23,7 +23,7 @@ Development workspace for the yearly CADT Next-Gen Engagement program. Build 0.2
 
 With Node 22.12+ and npm registry access, run `npm.cmd install` then `npm.cmd run dev` on Windows (or `npm install` / `npm run dev` elsewhere). The default interface uses synthetic sample data and needs no cloud account. See IMPLEMENTATION.md for checks, optional Supabase development setup and deployment boundaries.
 
-Package installation was blocked by this session's npm network restriction. No lockfile or successful application build exists yet. Nine dependency-free tests passed; browser, API and database tests are written but not run. Initial admissions/activation sources are included, with provider setup and verification still pending. Attendance capture, learning/assessments, project boards, jury/voting and other full workflows remain to be implemented.
+Package installation was blocked by this session's npm network restriction. No lockfile or successful application build exists yet. Fourteen dependency-free tests passed; browser, API and database tests are written but not run. Initial admissions/activation and dated attendance/leave sources are included, with provider setup and verification still pending. Learning/assessments, complete disputes/certificates, project boards, jury/voting and other full workflows remain to be implemented.
 
 ## Current direction
 
@@ -50,7 +50,7 @@ Updated 2026-11-05. **The initial application sources are unverified and not rea
 | Repository exclusions | `.gitignore` added for local secrets, generated files, private exports/backups and the supplied orientation PDF. |
 | Application, API, database policies and authentication | Initial source implementation exists for the foundation/selection slice; dependency installation, build and live integration verification are blocked. |
 | Secret scanning, CI checks, MFA, alerts and backups | CI definition and scoped admissions MFA checks are written; provider setup/execution, scanning, alerts and recovery verification remain pending. |
-| Runtime security tests / penetration test | Full acceptance scenarios not run. Nine narrow domain/validation tests passed; API, database, browser and live security verification remain pending. |
+| Runtime security tests / penetration test | Full acceptance scenarios not run. Fourteen narrow domain/validation/challenge tests passed; API, database, browser and live security verification remain pending. |
 
 `.gitignore` prevents some accidental additions. It does not remove already tracked files, detect secrets in other files, restrict access to files on a laptop, or erase Git history. The orientation PDF remains on disk; it should not be published with the application. Keep real student data out of the repository, including screenshots, issue attachments, test fixtures, extracted PDF material and AI prompts. Review what is staged before every commit.
 

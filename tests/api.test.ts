@@ -3,7 +3,7 @@ import { app } from '../server/index'
 describe('API boundary',()=>{
  it('health reports no private configuration and is not cached',async()=>{
   const response=await app.request('/api/health');expect(response.status).toBe(200)
-  expect(await response.json()).toEqual({status:'ok',version:'0.2.0'})
+  expect(await response.json()).toEqual({status:'ok',version:'0.3.0'})
   expect(response.headers.get('Cache-Control')).toBe('no-store')
   expect(response.headers.get('X-Content-Type-Options')).toBe('nosniff')
  })

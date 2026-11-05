@@ -6,7 +6,7 @@ const edition='10000000-0000-0000-0000-000000000001',staff='20000000-0000-0000-0
 async function asRole(role:string,user:string,sql:string){await db.exec(`set role ${role}; select set_config('request.jwt.claim.sub','${user}',false);`);try{return await db.exec(sql)}finally{await db.exec('reset role')}}
 beforeAll(async()=>{
  await db.exec(`create role anon;create role authenticated;create role service_role;create schema auth;create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz);create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;create function auth.jwt() returns jsonb language sql stable as $$select jsonb_build_object('aal',coalesce(current_setting('request.jwt.claim.aal',true),'aal1'))$$;grant usage on schema auth to authenticated;grant execute on function auth.uid(),auth.jwt() to authenticated;`)
- for(const file of ['202611050001_foundation.sql','202611050002_admissions.sql'])await db.exec(await readFile(new URL('../supabase/migrations/'+file,import.meta.url),'utf8'))
+ for(const file of ['202611050001_foundation.sql','202611050002_admissions.sql','202611050003_attendance.sql'])await db.exec(await readFile(new URL('../supabase/migrations/'+file,import.meta.url),'utf8'))
  await db.exec(`insert into auth.users values('${staff}','staff@example.test',now()),('${applicant}','applicant@example.test',null),('${other}','other@example.test',now());insert into public.editions(id,name) values('${edition}','Test edition');insert into public.edition_members values('${edition}','${staff}','organizer','CS',true);insert into public.edition_capabilities values('${edition}','${staff}','review_admissions'),('${edition}','${staff}','manage_recruitment');insert into public.recruitment_forms(id,edition_id,title,purpose,version,questions,published) values('${form}','${edition}','Trainee intake','trainee',1,'[{"id":"goal","label":"Original goal question","type":"text","required":true}]',true);`)
 })
 afterAll(async()=>{await db.close()})
@@ -30,6 +30,7 @@ it('review requires an assigned capability plus MFA; stale or skipped transition
  await db.exec(`select set_config('request.jwt.claim.aal','aal2',false)`)
  await expect(asRole('authenticated',other,`select public.review_application('${application}',1,'under_review','Review')`)).rejects.toThrow()
  await asRole('authenticated',staff,`select public.review_application('${application}',1,'under_review','Checking orientation outcome')`)
+ await expect(asRole('authenticated',staff,`select public.review_application('${application}',null,'passed','Orientation verified')`)).rejects.toThrow()
  await expect(asRole('authenticated',staff,`select public.review_application('${application}',1,'passed','Orientation verified')`)).rejects.toThrow()
  await expect(asRole('authenticated',applicant,`select public.activate_application('${application}')`)).rejects.toThrow()
  await asRole('authenticated',staff,`select public.review_application('${application}',2,'passed','Orientation pass verified by organizer')`)

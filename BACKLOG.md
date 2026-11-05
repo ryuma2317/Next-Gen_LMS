@@ -52,3 +52,9 @@ Create separate issues with detailed acceptance criteria before each implementat
 - Certificate generation, verification, archive, privacy and recovery.
 
 Each epic must cover authorized and forbidden actions, relevant race conditions, recovery behavior and evidence. Do not create automatic award, retention or fairness policies from unanswered questions.
+
+## Attendance and direct-RPC revision hardening
+
+Branch: `feat/attendance-sessions`, stacked on the initial bootstrap. Isolated checkout: `tmp/attendance-handoff`. Prepared full issue bodies and acceptance criteria are in `.github/handoff/attendance.md` and `.github/handoff/review-null-version.md`. They are not remotely created issues until GitHub confirms creation.
+
+Attendance source now covers scheduling, scoped rosters, six-second QR/manual challenges, first-fifteen-minute check-in, leave review, corrections, finalization and provisional quarter-unit totals. Fourteen dependency-free tests pass; the integration checks remain blocked. A forward migration also rejects NULL revisions in the older review RPC; source/test evidence is recorded in IMPLEMENTATION.md. Keep all runtime-dependent acceptance criteria open.
