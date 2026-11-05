@@ -1,6 +1,6 @@
 # Next-Gen Engagement Platform
 
-Development workspace for the yearly CADT Next-Gen Engagement program. Build 0.1 contains an initial React interface, protected API routes and database migration sources. It is not ready for real participants.
+Development workspace for the yearly CADT Next-Gen Engagement program. Build 0.2 includes initial React screens, protected APIs and migrations for selection and admissions. Live configuration and verification remain pending; it is not ready for real participants.
 
 ## Start here
 
@@ -15,12 +15,14 @@ Development workspace for the yearly CADT Next-Gen Engagement program. Build 0.1
 | [SECURITY.md](SECURITY.md) | Security requirements, threat model and 21 control groups to implement. |
 | [SECURITY_TEST_PLAN.md](SECURITY_TEST_PLAN.md) | Security acceptance scenarios and evidence required before release. |
 | [IMPLEMENTATION.md](IMPLEMENTATION.md) | Current code, setup commands, verification limits and next implementation steps. |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Issue, branch, review, commit and push workflow. |
+| [BACKLOG.md](BACKLOG.md) | Prepared issues and acceptance criteria; not yet created remotely. |
 
 ## Run the initial build
 
 With Node 22.12+ and npm registry access, run `npm.cmd install` then `npm.cmd run dev` on Windows (or `npm install` / `npm run dev` elsewhere). The default interface uses synthetic sample data and needs no cloud account. See IMPLEMENTATION.md for checks, optional Supabase development setup and deployment boundaries.
 
-Package installation was blocked by this session's npm network restriction. No lockfile or successful application build exists yet. The dependency-free domain tests passed; browser, API and database tests have been written but not run. Attendance capture, admissions, project boards, jury/voting and other full workflows remain to be implemented.
+Package installation was blocked by this session's npm network restriction. No lockfile or successful application build exists yet. Nine dependency-free tests passed; browser, API and database tests are written but not run. Initial admissions/activation sources are included, with provider setup and verification still pending. Attendance capture, learning/assessments, project boards, jury/voting and other full workflows remain to be implemented.
 
 ## Current direction
 
@@ -46,8 +48,8 @@ Updated 2026-11-05. **The initial application sources are unverified and not rea
 | Requirements and security acceptance scenarios | Written; awaiting implementation and execution. |
 | Repository exclusions | `.gitignore` added for local secrets, generated files, private exports/backups and the supplied orientation PDF. |
 | Application, API, database policies and authentication | Initial source implementation exists for the foundation/selection slice; dependency installation, build and live integration verification are blocked. |
-| Secret scanning, CI checks, MFA, alerts and backups | Required below; not configured by this documentation work. |
-| Runtime security tests / penetration test | Full acceptance scenarios not run. Three narrow domain tests passed; API, database, browser and live security verification remain pending. |
+| Secret scanning, CI checks, MFA, alerts and backups | CI definition and scoped admissions MFA checks are written; provider setup/execution, scanning, alerts and recovery verification remain pending. |
+| Runtime security tests / penetration test | Full acceptance scenarios not run. Nine narrow domain/validation tests passed; API, database, browser and live security verification remain pending. |
 
 `.gitignore` prevents some accidental additions. It does not remove already tracked files, detect secrets in other files, restrict access to files on a laptop, or erase Git history. The orientation PDF remains on disk; it should not be published with the application. Keep real student data out of the repository, including screenshots, issue attachments, test fixtures, extracted PDF material and AI prompts. Review what is staged before every commit.
 
