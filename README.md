@@ -19,6 +19,8 @@ Development workspace for the yearly CADT Next-Gen Engagement program. Build 0.4
 | [BACKLOG.md](BACKLOG.md) | Issue criteria, implementation queue and verified GitHub links. |
 | [GIT_HANDOFF.md](GIT_HANDOFF.md) | Published branches, draft PRs, original local commits and verification evidence. |
 
+Current development branch: **dev**. The reviewed stack was merged through [PR #12](https://github.com/ryuma2317/Next-Gen_LMS/pull/12); pre-merge and post-merge CI passed. Start new development branches from dev. See [DEV_REVIEW.md](DEV_REVIEW.md) for scope and remaining limits.
+
 ## Run the initial build
 
 With Node 22.12+ and npm registry access, run `npm.cmd ci` then `npm.cmd run dev` on Windows (or `npm ci` / `npm run dev` elsewhere). The default interface uses synthetic sample data and needs no cloud account. See IMPLEMENTATION.md for checks, optional Supabase development setup and deployment boundaries.

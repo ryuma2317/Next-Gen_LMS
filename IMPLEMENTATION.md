@@ -1,6 +1,6 @@
 # Implementation and next steps
 
-Current continuation: `fix/dependency-verification`, [draft PR #12](https://github.com/ryuma2317/Next-Gen_LMS/pull/12). The historical build notes below record what was known at each increment. CI now passes dependency installation, type checking, tests, build and Chromium browser checks on the verification branch; migration 006 addresses runtime defects found by the first full test run. See the latest CI evidence section and GIT_HANDOFF.md before relying on older blocked/NOT RUN statements.
+Current development baseline: **dev**, with the existing stack merged through [PR #12](https://github.com/ryuma2317/Next-Gen_LMS/pull/12) at `07164d9dc2da8bef1adac0c0564d547ce10ca4ad`. Pre-merge CI on the exact head and post-merge [dev CI run 41984710266](https://github.com/ryuma2317/Next-Gen_LMS/actions/runs/41984710266) passed installation, type checking, 74 automated tests and the production client/Worker build. See DEV_REVIEW.md and GIT_HANDOFF.md. The historical notes below record each earlier increment; live acceptance and unfinished program modules remain pending.
 
 ## Build 0.1 — foundation
 

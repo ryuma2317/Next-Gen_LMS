@@ -4,7 +4,7 @@ Owner instruction: track all development in GitHub issues with acceptance criter
 
 Repository: https://github.com/ryuma2317/Next-Gen_LMS
 
-The connector now publishes branches/issues/PRs directly. Use the verified register in GIT_HANDOFF.md; earlier access failures are historical. Current verification fixes are isolated in `tmp/verification-handoff` on `fix/dependency-verification` (draft PR #12). Local npm/shell network restrictions remain separate from successful connector/CI access. Full live acceptance is still required even when the automated CI is green.
+Current workflow: branch from dev, link the relevant issue and target new feature/fix PRs at dev. PR #12 integrated the reviewed original stack; #9/#10/#11 are superseded. CI runs for dev pushes as well as PRs. Use tmp/dev-handoff as the writable local development checkout; preserve the root checkout metadata. Full live acceptance is required separately from development integration, and main is not merged automatically. See GIT_HANDOFF.md for actual evidence.
 
 ## Per change
 
