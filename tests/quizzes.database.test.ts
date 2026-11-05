@@ -100,4 +100,19 @@ it('speed bonuses are server-calculated and an enrolled unanswered player cannot
  await db.query("update public.quiz_runs set deadline=clock_timestamp()-interval '1 second' where id=$1",[r])
  await expect(asUser(peer,'select public.answer_quiz_run($1,0,$2)',[r,'["a"]'])).rejects.toThrow('Question closed')
  expect((await db.query('select * from public.quiz_game_answers where run_id=$1',[r])).rows).toHaveLength(1)
+ const automatic=(await asUser(peer,'select public.quiz_run_view($1) result',[r])).rows[0].result
+ expect(automatic.phase).toBe('reveal');expect(automatic.correct).toEqual(['a']);expect(automatic.standings).toHaveLength(2)
+ await asUser(teacher,"select public.quiz_run_transition($1,2,'next','Advance after automatic timed reveal')",[r])
+ expect((await asUser(peer,'select public.quiz_run_view($1) result',[r])).rows[0].result.phase).toBe('finished')
+})
+it('editing permission alone does not grant private scores or monitoring reports',async()=>{
+ await db.query("delete from public.section_learning_permissions where section_id=$1 and user_id=$2 and capability='grade_work'",[section,teacher])
+ try{
+  await asUser(teacher,'select public.quiz_definition($1)',[exam])
+  const list=(await asUser(teacher,'select public.quiz_list($1) result',[section])).rows[0].result
+  expect(list[0].can_edit).toBe(true);expect(list[0].can_report).toBe(false)
+  await expect(asUser(teacher,'select public.quiz_report($1)',[exam])).rejects.toThrow()
+  await expect(asUser(teacher,'select public.quiz_attempt_events($1)',[attempt])).rejects.toThrow()
+  expect((await asUser(student,'select public.quiz_attempt_events($1) result',[attempt])).rows[0].result).toHaveLength(1)
+ }finally{await db.query("insert into public.section_learning_permissions values($1,$2,'grade_work')",[section,teacher])}
 })

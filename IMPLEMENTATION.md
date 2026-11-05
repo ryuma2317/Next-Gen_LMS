@@ -169,4 +169,4 @@ Latest rerun: [CI run 41982401894](https://github.com/ryuma2317/Next-Gen_LMS/act
 
 ## Quiz increment ? verification in progress
 
-Branch feat/quiz-modes, issue #16, based on dev 867da4bfc03e3a55b7f0b58800aa36f34f232cd2. New exam/live-game sources, teacher authoring, automatic choice grading, bounded advisory monitoring and server deadlines are documented in QUIZZES.md. Apply migrations 007/008/009/010 after the existing set; no migration was applied to a live provider. New native checks pass (27 total); full new type/API/PGlite/browser/build evidence is pending CI. This is not production readiness or a completed LMS.
+Branch feat/quiz-modes, issue #16, based on dev 867da4bfc03e3a55b7f0b58800aa36f34f232cd2. New exam/live-game sources, teacher authoring, automatic choice grading, bounded advisory monitoring and server deadlines are documented in QUIZZES.md. Apply migrations 007/008/009/010/011/012 after the existing set; no migration was applied to a live provider. New native checks pass (27 total); full new type/API/PGlite/browser/build evidence is pending CI. This is not production readiness or a completed LMS.

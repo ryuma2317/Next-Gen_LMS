@@ -7,8 +7,8 @@ import { Choices } from './Choices'
 export function GamePlayer({runId,quiz,session,host,onLeave,previewQuestions=[sampleQuestion]}:{runId:string;quiz:ListedQuiz;session:Session|null;host:boolean;onLeave:()=>void;previewQuestions?:Question[]}){
  const [game,setGame]=useState<GameView|null>(session?null:{id:runId,version:1,phase:'lobby',question_index:-1,deadline:null,server_now:new Date().toISOString(),question:null,correct:null,joined:false,answered:false,players:0,answered_count:0,standings:[]})
  const [selected,setSelected]=useState<string[]>([]),[message,setMessage]=useState(''),[busy,setBusy]=useState(false),[submittedIndex,setSubmittedIndex]=useState(-2),[now,setNow]=useState(Date.now())
- const offset=useRef(0),token=useRef(session?.access_token);token.current=session?.access_token
- function apply(row:GameView){offset.current=Date.parse(row.server_now)-Date.now();setGame(old=>!old||row.version>=old.version?row:old)}
+ const offset=useRef(0),lastRow=useRef<{version:number;time:number}|null>(null),token=useRef(session?.access_token);token.current=session?.access_token
+ function apply(row:GameView){const time=Date.parse(row.server_now),old=lastRow.current;if(old&&(row.version<old.version||(row.version===old.version&&time<old.time)))return;lastRow.current={version:row.version,time};offset.current=time-Date.now();setGame(row)}
  async function refresh(){if(token.current)apply(await api('/quiz-games/'+runId,token.current))}
  useEffect(()=>{
   let cancelled=false,inFlight=false
@@ -17,6 +17,7 @@ export function GamePlayer({runId,quiz,session,host,onLeave,previewQuestions=[sa
   return()=>{cancelled=true;clearInterval(interval)}
  },[runId])
  useEffect(()=>setSelected([]),[game?.question_index])
+ useEffect(()=>{if(!session&&game?.phase==='question'&&game.deadline&&now>=Date.parse(game.deadline)){const q=previewQuestions[game.question_index];setGame({...game,phase:'reveal',correct:q.correct,standings:[{label:'Sample participant',rank:1,is_you:!host,score_units:gradeChoice(q,selected)}]})}},[now,game?.phase])
  async function action(name:'join'|'answer'|'next'|'reveal'|'finish'){
   if(!game||busy)return;setBusy(true);setMessage('')
   try{
@@ -37,7 +38,7 @@ export function GamePlayer({runId,quiz,session,host,onLeave,previewQuestions=[sa
  if(!game)return <p role="status">Loading game… {message}</p>
  const remaining=game.deadline?Math.max(0,Math.ceil((Date.parse(game.deadline)-now-offset.current)/1000)):0
  return <article className="learning-editor quiz-game"><div className="section-heading"><h3>{quiz.title}</h3><strong>{game.phase==='question'?remaining+'s':game.phase}</strong></div>
-  <p>{game.players} participants · {game.answered_count} answers locked. Join with your own enrolled class account; the lobby closes when the first question opens.</p>
+  <p>{game.players} participants · {game.answered_count} answers locked. Join with your own enrolled class account; the lobby closes when the first question opens. Results reveal automatically when time expires, or the teacher can close a question early.</p>
   {game.phase==='lobby'&&!host&&!game.joined&&<button className="primary-button" disabled={busy} onClick={()=>void action('join')}>Join game</button>}
   {game.question&&<Choices question={game.question} selected={selected} disabled={host||!game.joined||game.phase!=='question'||remaining===0||game.answered||submittedIndex===game.question_index} onChange={setSelected}/>}
   {!host&&game.phase==='question'&&game.joined&&<button className="primary-button" disabled={busy||!selected.length||remaining===0||game.answered||submittedIndex===game.question_index} onClick={()=>void action('answer')}>{game.answered||submittedIndex===game.question_index?'Answer locked':'Lock answer'}</button>}
