@@ -2,7 +2,7 @@
 
 Updated: 2026-11-05. Companion to [SECURITY.md](SECURITY.md) and the [README operational runbook](README.md).
 
-**Execution status: NOT RUN for every full scenario below.** Initial application and test sources now exist; see [IMPLEMENTATION.md](IMPLEMENTATION.md). Twenty-one dependency-free domain/validation/challenge tests provide narrow supporting evidence, but do not complete these end-to-end security scenarios. No database deployment or full security test run has occurred. New regression sources include named default function grants, grading draft privacy and attendance expiry after lock waits.
+**Execution status: NOT RUN for every full scenario below.** Initial application and test sources now exist; see [IMPLEMENTATION.md](IMPLEMENTATION.md). CI now passes 21 domain/validation/challenge tests, 37 API/PGlite tests and 16 synthetic Chromium browser tests. These provide scoped supporting evidence, but do not complete these end-to-end security scenarios. No database deployment or full security test run has occurred. Passing regressions include named default function grants, grading draft privacy, attendance expiry checks and private leave-read visibility. Actual lock-wait concurrency and real Supabase/MFA/device tests remain separate requirements; see IMPLEMENTATION.md for the CI run.
 
 ## How to use this plan
 

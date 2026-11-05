@@ -16,16 +16,18 @@ Development workspace for the yearly CADT Next-Gen Engagement program. Build 0.4
 | [SECURITY_TEST_PLAN.md](SECURITY_TEST_PLAN.md) | Security acceptance scenarios and evidence required before release. |
 | [IMPLEMENTATION.md](IMPLEMENTATION.md) | Current code, setup commands, verification limits and next implementation steps. |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Issue, branch, review, commit and push workflow. |
-| [BACKLOG.md](BACKLOG.md) | Prepared issues and acceptance criteria; not yet created remotely. |
-| [GIT_HANDOFF.md](GIT_HANDOFF.md) | Actual local commits, failed push evidence and a publishing script for normal PowerShell. |
+| [BACKLOG.md](BACKLOG.md) | Issue criteria, implementation queue and verified GitHub links. |
+| [GIT_HANDOFF.md](GIT_HANDOFF.md) | Published branches, draft PRs, original local commits and verification evidence. |
 
 ## Run the initial build
 
-With Node 22.12+ and npm registry access, run `npm.cmd install` then `npm.cmd run dev` on Windows (or `npm install` / `npm run dev` elsewhere). The default interface uses synthetic sample data and needs no cloud account. See IMPLEMENTATION.md for checks, optional Supabase development setup and deployment boundaries.
+With Node 22.12+ and npm registry access, run `npm.cmd ci` then `npm.cmd run dev` on Windows (or `npm ci` / `npm run dev` elsewhere). The default interface uses synthetic sample data and needs no cloud account. See IMPLEMENTATION.md for checks, optional Supabase development setup and deployment boundaries.
 
-Package installation remains blocked by this session's npm network restriction. No lockfile or successful application build exists yet. Twenty-one dependency-free tests passed; browser, API and database tests are written but not run. Account settings include initial authenticator enrollment and verification sources; provider testing is pending. Initial learning sources now include lesson drafts, configured individual text/link assignments, immutable submissions and separately released grading. Quizzes, file/group submissions, complete disputes/certificates, projects/rooms, jury/voting and administration workflows remain unfinished.
+Local package installation remains blocked, but GitHub Actions generated the reviewed dependency lock and has installed packages and passed type checking. Twenty-one dependency-free tests passed locally and in CI. The complete rerun on the verification branch passed 21 domain tests, 37 API/PGlite tests, the client/Worker build and 16 Chromium browser tests after migration 006 fixed two database defects. Evidence and remaining live-integration limits are recorded in IMPLEMENTATION.md.
 
-**Current setup requires every migration through `202611050005_function_grants.sql`.** The latest Worker and migrations 004/005 must be deployed together in the reviewed development/release process. Migration 004 replaces the attendance recording interface; 005 explicitly restricts named-role function grants. Earlier increment setup notes are historical and do not establish readiness to expose live intake or check-in.
+Account settings include initial authenticator enrollment and verification sources; provider testing is pending. Initial learning sources now include lesson drafts, configured individual text/link assignments, immutable submissions and separately released grading. Quizzes, file/group submissions, complete disputes/certificates, projects/rooms, jury/voting and administration workflows remain unfinished.
+
+**Current setup requires every migration through `202611050006_runtime_database.sql`.** The latest Worker and migrations 004/005/006 must be deployed together in the reviewed development/release process. Migration 004 replaces the attendance recording interface; 005 explicitly restricts named-role function grants. Earlier increment setup notes are historical and do not establish readiness to expose live intake or check-in.
 
 ## Current direction
 
@@ -44,15 +46,15 @@ The current React/Vite/Workers recommendation supersedes the earlier Next.js/Ver
 
 ## Security status — read before developing or handing over
 
-Updated 2026-11-05. **The initial application sources are unverified and not ready for production.** The security documents describe required behavior; they are not evidence that the application already provides all of it. IMPLEMENTATION.md records the current increment and actual checks.
+Updated 2026-11-05. **The initial application is not ready for production.** Automated checks pass on the verification branch; live acceptance remains pending. The security documents describe required behavior; they are not evidence that the application already provides all of it. IMPLEMENTATION.md records the current increment and actual checks.
 
 | Item | Current status |
 | --- | --- |
 | Requirements and security acceptance scenarios | Written; awaiting implementation and execution. |
 | Repository exclusions | `.gitignore` added for local secrets, generated files, private exports/backups and the supplied orientation PDF. |
-| Application, API, database policies and authentication | Initial source implementation exists for the foundation/selection slice; dependency installation, build and live integration verification are blocked. |
-| Secret scanning, CI checks, MFA, alerts and backups | CI definition and scoped admissions MFA checks are written; provider setup/execution, scanning, alerts and recovery verification remain pending. |
-| Runtime security tests / penetration test | Full acceptance scenarios not run. Twenty-one narrow domain/validation/challenge tests passed; API, database, browser and live security verification remain pending. |
+| Application, API, database policies and authentication | Sources cover foundation, admissions, attendance and initial learning. Automated type/build/API/PGlite/preview-browser checks pass on the verification branch; live integration remains pending. |
+| Secret scanning, CI checks, MFA, alerts and backups | CI executes with pinned actions; scoped MFA sources are written. Provider setup, live security scenarios, alerts and recovery verification remain pending. |
+| Runtime security tests / penetration test | Full acceptance scenarios not run. CI passes 21 domain, 37 API/PGlite and 16 preview-browser tests; real Supabase/device/concurrency and live security verification remain pending. |
 
 `.gitignore` prevents some accidental additions. It does not remove already tracked files, detect secrets in other files, restrict access to files on a laptop, or erase Git history. The orientation PDF remains on disk; it should not be published with the application. Keep real student data out of the repository, including screenshots, issue attachments, test fixtures, extracted PDF material and AI prompts. Review what is staged before every commit.
 

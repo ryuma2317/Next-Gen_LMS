@@ -4,6 +4,8 @@ Owner instruction: track all development in GitHub issues with acceptance criter
 
 Repository: https://github.com/ryuma2317/Next-Gen_LMS
 
+The connector now publishes branches/issues/PRs directly. Use the verified register in GIT_HANDOFF.md; earlier access failures are historical. Current verification fixes are isolated in `tmp/verification-handoff` on `fix/dependency-verification` (draft PR #12). Local npm/shell network restrictions remain separate from successful connector/CI access. Full live acceptance is still required even when the automated CI is green.
+
 ## Per change
 
 1. Create or find an issue. Describe the user outcome, acceptance criteria, policy dependencies and validation. Do not put private participant data or credentials in issues.
@@ -14,7 +16,9 @@ Repository: https://github.com/ryuma2317/Next-Gen_LMS
 6. Open/update a draft PR describing outcome, scope, tests and remaining limitations. Link the issue. Mark ready only after its acceptance criteria pass. Do not automatically close an issue or merge a PR merely because source code was uploaded.
 7. After merge, verify the correct commit/schema reached the intended environment through the approved release procedure. A push is not a deployment.
 
-## Current connection blockers (2026-11-05)
+## Historical connection failures (2026-11-05)
+
+These earlier attempts are retained as history; the publication register above supersedes them.
 
 - GitHub read access succeeds. Creating an issue and `feat/platform-foundation` branch both returned HTTP 403, `Resource not accessible by integration`. Neither remote mutation succeeded.
 - Local Git metadata is read-only in this execution session. `git switch -c feat/platform-foundation` could not lock/create the branch ref. No local commit or branch was created.
@@ -23,7 +27,7 @@ Repository: https://github.com/ryuma2317/Next-Gen_LMS
 - The isolated checkout `tmp/git-handoff` is writable, and `feat/lms-platform-admissions` was created there for the combined initial import. The original checkout's `.git` remains unchanged. Report isolated local commits separately from actual remote pushes.
 - Prepared issue descriptions and acceptance criteria are in BACKLOG.md. They must be created remotely after GitHub access is fixed; local descriptions are not GitHub issues.
 
-Resolve the GitHub app's contents/issues/pull-request write permissions for this repository. Local Git metadata also needs writable access for local branching/commits, or use an authorized GitHub API workflow that checks the expected remote head before advancing a ref. Never force-push over another person's work. No push/commit/issue creation is claimed until confirmed by GitHub.
+The earlier troubleshooting concerned the GitHub app's contents/issues/pull-request write permissions; connector publication has now succeeded. Local Git metadata also needs writable access for local branching/commits, or use an authorized GitHub API workflow that checks the expected remote head before advancing a ref. Never force-push over another person's work. No push/commit/issue creation is claimed until confirmed by GitHub.
 
 Update: two actual local commits were prepared in the isolated checkout (`26322a6` documentation and `3471ed8` application sources), followed by publishing-runbook/script work. Direct push failed before authentication because this session could not connect to GitHub port 443. No remote push or issue creation succeeded. See [GIT_HANDOFF.md](GIT_HANDOFF.md) for the reviewable publishing script and exact status. Future repository permissions need not be broadened merely to fix an unavailable connector or blocked network.
 

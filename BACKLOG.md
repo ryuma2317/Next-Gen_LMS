@@ -4,7 +4,7 @@ Issue bodies are prepared in `.github/handoff`. The connector recovered on 2026-
 
 ## Foundation: role workspaces, protected API and atomic subject selection
 
-Planned branch: `feat/platform-foundation`. Status: source written, incomplete verification.
+Branch: `feat/lms-platform-admissions` ([#2](https://github.com/ryuma2317/Next-Gen_LMS/issues/2)). Status: source written, incomplete verification.
 
 - [ ] Responsive synthetic preview works on desktop/mobile and with keyboard navigation.
 - [ ] Session-verified API and RLS deny unauthenticated, cross-edition and cross-user access.
@@ -16,7 +16,7 @@ Planned branch: `feat/platform-foundation`. Status: source written, incomplete v
 
 ## Admissions: versioned recruitment forms, review and activation
 
-Planned branch: `feat/admissions-activation`, based on foundation until it merges. Status: in progress.
+Branch: `feat/lms-platform-admissions` ([#3](https://github.com/ryuma2317/Next-Gen_LMS/issues/3)). Status: in progress.
 
 - [ ] Published versioned forms support trainer/trainee applications without precreating participant access.
 - [ ] Store all submitted answers against the original question/version snapshot.
@@ -30,13 +30,13 @@ Planned branch: `feat/admissions-activation`, based on foundation until it merge
 
 ## Blocker: restore dependency installation and verify the build
 
-Planned branch: `fix/dependency-verification`. Status: blocked by execution environment.
+Planned branch: `fix/dependency-verification`. Status: active on [draft PR #12](https://github.com/ryuma2317/Next-Gen_LMS/pull/12); lockfile generation, installation, type checking, automated tests/build and Chromium checks now pass. Live provider/device/concurrency QA remains pending.
 
-- [ ] npm can reach the approved registry.
-- [ ] Review resolved versions, compatibility and advisories; commit the real generated lockfile.
-- [ ] Type checking, full test suite and production build pass; fix confirmed failures.
+- [x] CI can reach the approved npm registry; the local shell remains blocked.
+- [x] Commit the generated lockfile after manifest/registry/integrity review; CI reports zero known vulnerabilities at this run.
+- [x] Current automated suite, type checking and production build pass in CI after fixing the two confirmed database defects.
 - [ ] Desktop/mobile browser and keyboard checks run with evidence.
-- [ ] CI uses `npm ci`; missing lockfile does not produce a misleading success.
+- [x] CI uses `npm ci`; the missing-lock gate failed before the generated lock was committed.
 
 ## Remaining program epics
 
@@ -55,12 +55,14 @@ Each epic must cover authorized and forbidden actions, relevant race conditions,
 
 ## Attendance and direct-RPC revision hardening
 
-Branch: `feat/attendance-sessions`, stacked on the initial bootstrap. Isolated checkout: `tmp/attendance-handoff`. Prepared full issue bodies and acceptance criteria are in `.github/handoff/attendance.md` and `.github/handoff/review-null-version.md`. They are not remotely created issues until GitHub confirms creation.
+Branch: `feat/attendance-sessions`, stacked on the initial bootstrap. Isolated checkout: `tmp/attendance-handoff`. Prepared full issue bodies and acceptance criteria are in `.github/handoff/attendance.md` and `.github/handoff/review-null-version.md`. Remote issues [#4](https://github.com/ryuma2317/Next-Gen_LMS/issues/4) and [#5](https://github.com/ryuma2317/Next-Gen_LMS/issues/5) now exist.
 
 Attendance source now covers scheduling, scoped rosters, six-second QR/manual challenges, first-fifteen-minute check-in, leave review, corrections, finalization and provisional quarter-unit totals. Fourteen dependency-free tests pass; the integration checks remain blocked. A forward migration also rejects NULL revisions in the older review RPC; source/test evidence is recorded in IMPLEMENTATION.md. Keep all runtime-dependent acceptance criteria open.
 
 ## Learning and forward security hardening
 
-Branch: `feat/learning-assignments`, stacked on attendance. Prepared issue bodies: `.github/handoff/learning.md`, `time-guards.md` and `function-grants.md`. Source covers lesson publication, explicitly configured individual assignments, immutable submissions, separately released grading, post-lock code expiry and named function-role grants. Latest narrow evidence: 21 passing dependency-free tests and 33 parsed TypeScript/TSX files. All runtime-dependent criteria remain open; the issue bodies are not remotely created issues yet.
+Branch: `feat/learning-assignments`, stacked on attendance. Prepared issue bodies: `.github/handoff/learning.md`, `time-guards.md` and `function-grants.md`. Source covers lesson publication, explicitly configured individual assignments, immutable submissions, separately released grading, post-lock code expiry and named function-role grants. Latest narrow evidence: 21 passing dependency-free tests and 33 parsed TypeScript/TSX files. All runtime-dependent criteria remain open; remote issues #6/#7/#8 now exist (linked in GIT_HANDOFF.md).
 
 Remaining learning work includes quizzes, file/group submissions, server autosave/resumption, content revision/withdrawal, appeals/rubrics, larger catalogue pagination and approved transcript/certificate policy. Real multi-role workspace switching and all edition/section assignment administration also remain unfinished; SQL authorization is independent of preview labels.
+
+CI runtime fixes are tracked in [#13](https://github.com/ryuma2317/Next-Gen_LMS/issues/13), alongside dependency verification [#1](https://github.com/ryuma2317/Next-Gen_LMS/issues/1). Migration 006 fixes admissions SQL ambiguity and leave-read RLS without widening direct table access. See IMPLEMENTATION.md for actual rerun evidence.

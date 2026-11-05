@@ -1,5 +1,7 @@
 # Implementation and next steps
 
+Current continuation: `fix/dependency-verification`, [draft PR #12](https://github.com/ryuma2317/Next-Gen_LMS/pull/12). The historical build notes below record what was known at each increment. CI now passes dependency installation, type checking, tests, build and Chromium browser checks on the verification branch; migration 006 addresses runtime defects found by the first full test run. See the latest CI evidence section and GIT_HANDOFF.md before relying on older blocked/NOT RUN statements.
+
 ## Build 0.1 — foundation
 
 This is an initial development increment, not a production-ready LMS. No cloud resources were created and no real accounts or records were imported.
@@ -140,7 +142,7 @@ Migration 005 explicitly revokes PUBLIC and named anon/authenticated/service_rol
 
 ### Setup and evidence
 
-1. Apply **all five migrations** to an isolated Supabase project and execute the complete tests, including named-default-grant simulation and function-privilege assertions. Check Supabase advisories on the actual project. Bootstrap/attendance sources alone are not a complete secure deployment.
+1. Apply **all six migrations** to an isolated Supabase project and execute the complete tests, including named-default-grant simulation and function-privilege assertions. Check Supabase advisories on the actual project. Bootstrap/attendance sources alone are not a complete secure deployment.
 2. Through the approved operator process, assign section trainers and explicit section learning permissions. Verify active trainer department/edition scope, set up MFA in Account settings, then verify the authenticator in the Learning screen when needed. Enable and test the provider's TOTP settings first. No public endpoint allows participants to grant these rights.
 3. Have the responsible teaching/program authority select each assignment's publishing rules. Drafts preserve unresolved choices; group, quiz, rubric/appeal and certificate policy decisions remain in DISCOVERY_QUESTIONS.md.
 4. Test deadlines, delayed/duplicate requests, grade draft privacy, permission revocation, token refresh, cross-class IDs, NULL/stale revisions, paging, keyboard/mobile behavior and separate-connection concurrency before real use.
@@ -154,3 +156,13 @@ Prepared feature/bug issue bodies: `.github/handoff/learning.md`, `time-guards.m
 The account flow uses the provider's [TOTP enrollment API](https://supabase.com/docs/reference/javascript/auth-mfa-enroll) and [challenge-and-verify API](https://supabase.com/docs/reference/javascript/auth-mfa-challengeandverify). Verification can revoke other sessions. Enrollment does not assign a program role or capability. Provider/browser integration has not run here; test initial setup, existing factors, invalid/expired codes, repeated clicks, refresh, sign-out and cross-account navigation before enabling it.
 
 Leaving before verification can leave an unverified factor at the provider. The UI blocks another enrollment when such a factor already exists. A designated platform owner must verify the user's identity through the approved private recovery channel, inspect the exact account/factor and remove only the confirmed unverified setup using provider administration before the user retries. Do not remove verified factors as routine cleanup, run bulk factor deletion, or collect the user's QR/secret/code in an issue. Verified-factor loss requires the documented identity/recovery process and an audited provider action; this increment adds no self-service MFA reset or security bypass. Test and assign the recovery owner before launch.
+
+## CI verification continuation
+
+GitHub publishing recovered: foundation/admissions #9, attendance #10, learning #11 and verification #12 are published draft PRs. Main is unchanged. Actual issue links, commit mappings and isolated checkout details are in GIT_HANDOFF.md.
+
+A read-only CI workflow generated package-lock.json with install scripts disabled. The reconstructed SHA-256 and root manifest/registry/integrity checks passed; 229 package records are locked. npm ci then succeeded and npm reported zero known vulnerabilities in that run; this is time-limited scanner evidence, not a guarantee of dependency safety. CI warned that esbuild/workerd install scripts were not approved by its npm policy; do not broadly approve scripts without review.
+
+Initial full CI run 41982089448 passed type checking and 31/37 Vitest tests, while six failed. The root defects were admissions' ambiguous PL/pgSQL `q` alias and leave-read RLS depending on the deliberately ungranted teaching_sessions table. Migration 006 fixes forward: an explicit JSON alias in the service-only intake RPC and a tightly scoped private definer helper for leave reads. It preserves all old migrations, direct session-table denial and existing MFA/edition/owner restrictions. The helper and replaced RPC explicitly revoke named-role default grants before restoring their intended allowlist. Tests now apply all six migrations and check owner/reviewer/teacher/outsider leave visibility.
+
+Latest rerun: [CI run 41982401894](https://github.com/ryuma2317/Next-Gen_LMS/actions/runs/41982401894) **PASS** on source commit `513e306742ec50e4434daf2910e3236699bb4e4b`: npm ci, TypeScript type checking, 21 dependency-free tests, 37 Vitest API/PGlite tests, client/Worker production build, and 16 Chromium browser tests. Both domain and application jobs passed. Browser tests exercise synthetic previews; they do not establish real provider integration or visual/accessibility review. Local package installation is still blocked. A final documentation commit records this already-tested source; routine checks may run again on that commit. Live Supabase/provider/MFA/camera integration, real concurrency, device/accessibility/visual QA and full security acceptance remain unverified. The complete program LMS is unfinished; these checks do not implement the remaining projects/rooms/jury/voting/certificates.
