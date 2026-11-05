@@ -3,7 +3,7 @@ export type Question = { id: string; kind: 'single' | 'multiple'; prompt: string
 export type PublicQuestion = Omit<Question, 'correct'>
 export type QuizConfig = {
   opens_at: string | null; closes_at: string | null; duration_seconds: number | null; max_attempts: number | null;
-  results: 'immediate' | 'after_close' | 'teacher' | null; monitoring: 'fullscreen_visibility' | 'none' | null;
+  results: 'immediate' | 'after_close' | 'teacher' | null; monitoring: 'fullscreen_visibility' | null;
   focus_response: 'report' | 'warn_report' | null; question_seconds: number | null;
   scoring: 'correct' | 'speed' | null; speed_bonus_percent: number | null; leaderboard: 'each_question' | 'end' | null;
 }
@@ -22,7 +22,7 @@ export function validateQuizDraft(value: unknown): QuizDraft {
   if (!shape(c, Object.keys(emptyQuizConfig()))) throw new Error('Invalid quiz settings')
   for (const key of ['opens_at', 'closes_at']) if (c[key] !== null && (typeof c[key] !== 'string' || !/^\d{4}-\d\d-\d\dT/.test(c[key] as string) || !Number.isFinite(Date.parse(c[key] as string)))) throw new Error('Use valid opening/closing times')
   for (const [key, min, max] of [['duration_seconds', 30, 10800], ['max_attempts', 1, 5], ['question_seconds', 5, 300], ['speed_bonus_percent', 0, 100]] as const) if (c[key] !== null && !integer(c[key], min, max)) throw new Error('Quiz setting is outside its supported range')
-  for (const [key, choices] of Object.entries({ results: ['immediate', 'after_close', 'teacher'], monitoring: ['fullscreen_visibility', 'none'], focus_response: ['report', 'warn_report'], scoring: ['correct', 'speed'], leaderboard: ['each_question', 'end'] })) if (c[key] !== null && !choices.includes(String(c[key]))) throw new Error('Unknown quiz setting')
+  for (const [key, choices] of Object.entries({ results: ['immediate', 'after_close', 'teacher'], monitoring: ['fullscreen_visibility'], focus_response: ['report', 'warn_report'], scoring: ['correct', 'speed'], leaderboard: ['each_question', 'end'] })) if (c[key] !== null && !choices.includes(String(c[key]))) throw new Error('Unknown quiz setting')
   if (!Array.isArray(value.questions) || value.questions.length > 15) throw new Error('Use at most 15 questions in this increment')
   const seen = new Set<string>()
   for (const q of value.questions) {

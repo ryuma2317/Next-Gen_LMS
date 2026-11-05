@@ -13,7 +13,7 @@ export function QuizEditor({draft,setDraft,busy,onSave,onCancel}:{draft:Editable
    {(['opens_at','closes_at'] as const).map(key=><label key={key}>{key==='opens_at'?'Opens':'Closes'} (device local time)<input type="datetime-local" value={localTime(draft.config[key])} onChange={e=>config(key,e.target.value?new Date(e.target.value).toISOString():null)}/></label>)}
    {number('duration_seconds','Attempt duration (seconds)',30,10800)}{number('max_attempts','Maximum attempts',1,5)}
    {select('results','Release scores',[['immediate','After submission'],['after_close','After quiz closes'],['teacher','When teacher releases']])}
-   {select('monitoring','Exam monitoring',[['fullscreen_visibility','Request fullscreen and report visibility events'],['none','No browser monitoring']])}
+   {select('monitoring','Exam monitoring',[['fullscreen_visibility','Request fullscreen and report visibility events']])}
    {select('focus_response','Response to monitoring events',[['report','Report for teacher review'],['warn_report','Warn and report for teacher review']])}
   </>:<>
    {number('question_seconds','Each question (seconds)',5,300)}

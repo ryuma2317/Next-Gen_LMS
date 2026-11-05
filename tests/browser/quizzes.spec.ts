@@ -15,12 +15,14 @@ test('teacher authors a complete game quiz and publishes its configured correct 
  await page.getByRole('button',{name:'Create quiz'}).click();await page.getByLabel('Title',{exact:true}).fill('Synthetic custom quiz')
  await page.getByLabel('Mode',{exact:true}).selectOption('game');await page.getByLabel('Each question (seconds)').fill('20')
  await page.getByLabel('Scoring',{exact:true}).selectOption('correct');await page.getByLabel('Show leaderboard').selectOption('each_question')
- await page.getByRole('button',{name:'Add question',exact:true}).click();await page.getByLabel('Question text').fill('Synthetic custom question')
+ const prompt='Synthetic custom question <img src=x onerror="window.quizPwned=1">'
+ await page.getByRole('button',{name:'Add question',exact:true}).click();await page.getByLabel('Question text').fill(prompt)
  await page.getByLabel('Option 1',{exact:true}).fill('Correct sample option');await page.getByLabel('Option 2',{exact:true}).fill('Other sample option');await page.getByLabel('Correct',{exact:true}).first().check()
  await page.getByRole('button',{name:'Save quiz draft'}).click();await page.getByLabel('Reason for publishing, closing or releasing').fill('Reviewed synthetic settings')
  const card=page.getByRole('article').filter({has:page.getByRole('heading',{name:'Synthetic custom quiz'})});await card.getByRole('button',{name:'Publish quiz'}).click()
  await expect(card).toContainText('published');await card.getByRole('button',{name:'Host / resume game'}).click();await page.getByRole('button',{name:'Start first question'}).click()
- await expect(page.locator('.quiz-game')).toContainText('Synthetic custom question')
+ await expect(page.locator('.quiz-game')).toContainText(prompt)
+ expect(await page.evaluate(()=>(window as unknown as Record<string,unknown>).quizPwned)).toBeUndefined()
 })
 test('unsupported fullscreen preflight does not start a sample exam',async({page})=>{
  await page.addInitScript(()=>{HTMLElement.prototype.requestFullscreen=async()=>{throw new Error('Unsupported synthetic browser')}})

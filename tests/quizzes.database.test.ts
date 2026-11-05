@@ -29,7 +29,9 @@ it('keeps drafts/keys private and requires assigned editing permission/MFA and f
  await expect(asUser(student,'select public.quiz_definition($1)',[exam])).rejects.toThrow()
  await expect(asUser(teacher,"select public.quiz_transition($1,null,'publish','Ready')",[exam])).rejects.toThrow()
  await asUser(teacher,"select public.quiz_transition($1,1,'publish','Reviewed all settings')",[exam])
- const list=await asUser(student,'select * from public.quiz_list($1)',[section]);expect(JSON.stringify(list.rows)).not.toContain('"correct"');expect(JSON.stringify(list.rows)).not.toContain('"questions"')
+ const list=await asUser(student,'select * from public.quiz_list($1)',[section])
+ expect(Object.keys(list.rows[0].quiz_list).sort()).toEqual(['id','section_id','title','description','mode','config','state','version','released','can_edit','can_report','can_participate'].sort())
+ expect(list.rows[0].quiz_list).not.toHaveProperty('questions')
  await expect(asUser(teacher,'select public.save_quiz($1,$2,2,$3)',[exam,section,JSON.stringify(fields())])).rejects.toThrow()
 })
 it('starts/resumes own attempts with server timing, no keys and cross-class denial',async()=>{
@@ -77,4 +79,24 @@ it('live games scope joining/hosting, hide keys, reject late/duplicate replaceme
  const reveal=(await asUser(student,'select public.quiz_run_view($1) result',[run])).rows[0].result;expect(reveal.correct).toEqual(['a']);expect(reveal.standings[0].score_units).toBe(1000)
  await asUser(teacher,"select public.quiz_run_transition($1,3,'next','Finish')",[run])
  expect((await asUser(student,'select public.quiz_run_view($1) result',[run])).rows[0].result.phase).toBe('finished')
+})
+it('publication rejects undecided settings and unsupported unmonitored exams',async()=>{
+ const q=id(70),incomplete={...fields(),config:{...config(),max_attempts:null}}
+ await asUser(teacher,'select public.save_quiz($1,$2,0,$3)',[q,section,JSON.stringify(incomplete)])
+ await expect(asUser(teacher,"select public.quiz_transition($1,1,'publish','Incomplete')",[q])).rejects.toThrow('Complete exam settings')
+ await expect(asUser(teacher,'select public.save_quiz($1,$2,1,$3)',[q,section,JSON.stringify({...fields(),config:{...config(),monitoring:'none'}})])).rejects.toThrow()
+})
+it('speed bonuses are server-calculated and an enrolled unanswered player cannot submit after the deadline',async()=>{
+ const q=id(80),r=id(81)
+ await asUser(teacher,'select public.save_quiz($1,$2,0,$3)',[q,section,JSON.stringify({...fields('game'),config:{...config(),scoring:'speed',speed_bonus_percent:50}})])
+ await asUser(teacher,"select public.quiz_transition($1,1,'publish','Review speed formula')",[q])
+ await asUser(teacher,'select public.create_quiz_run($1,$2)',[q,r])
+ await asUser(student,'select public.join_quiz_run($1)',[r]);await asUser(peer,'select public.join_quiz_run($1)',[r])
+ await asUser(teacher,"select public.quiz_run_transition($1,1,'next','Open timed question')",[r])
+ await asUser(student,'select public.answer_quiz_run($1,0,$2)',[r,'["a"]'])
+ const saved=(await db.query<{score_units:number}>('select score_units from public.quiz_game_answers where run_id=$1 and user_id=$2',[r,student])).rows[0]
+ expect(saved.score_units).toBeGreaterThan(1000);expect(saved.score_units).toBeLessThanOrEqual(1500)
+ await db.query("update public.quiz_runs set deadline=clock_timestamp()-interval '1 second' where id=$1",[r])
+ await expect(asUser(peer,'select public.answer_quiz_run($1,0,$2)',[r,'["a"]'])).rejects.toThrow('Question closed')
+ expect((await db.query('select * from public.quiz_game_answers where run_id=$1',[r])).rows).toHaveLength(1)
 })

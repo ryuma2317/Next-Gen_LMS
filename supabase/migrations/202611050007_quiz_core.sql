@@ -71,7 +71,7 @@ begin
  end loop;
  if (c->>'duration_seconds')::integer not between 30 and 10800 or (c->>'max_attempts')::integer not between 1 and 5
  or (c->>'question_seconds')::integer not between 5 and 300 or (c->>'speed_bonus_percent')::integer not between 0 and 100 then raise exception 'Setting out of range';end if;
- if (c->>'results') not in ('immediate','after_close','teacher') or (c->>'monitoring') not in ('none','fullscreen_visibility')
+ if (c->>'results') not in ('immediate','after_close','teacher') or (c->>'monitoring') not in ('fullscreen_visibility')
  or (c->>'focus_response') not in ('report','warn_report') or (c->>'scoring') not in ('correct','speed') or (c->>'leaderboard') not in ('each_question','end') then raise exception 'Unknown setting';end if;
  foreach k in array array['results','monitoring','focus_response','scoring','leaderboard','opens_at','closes_at'] loop
   if c->k<>'null'::jsonb and jsonb_typeof(c->k)<>'string' then raise exception 'Invalid setting type';end if;
