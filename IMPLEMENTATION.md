@@ -1,5 +1,11 @@
 # Implementation and next steps
 
+## Project boards increment (2026-11-06)
+
+Issue #21, feat/21-project-boards from dev d9a318dabd51518abc377cca777c76e806592ecc (PR #20 merged; post-merge run 42163736922 passed 116 tests, type checking and build). New sources add separate project assignments, explicit capabilities/capacities, private kanban work, comments/history and sprint planning. See PROJECTS.md and REMAINING_WORK.md. Apply all migrations through 202611060013_projects.sql when preparing an isolated pilot; no migration/deployment occurred here.
+
+Local native checks: 36 PASS, including contract discovery for 69 HTTP operations and project validation. HTTP, direct-RPC/PGlite and Chromium test sources are written; full CI is pending publication at this snapshot. Existing JSX/type/build tests must pass before dev integration. TypeScript permits .ts imports under noEmit so the native Node tests can run shared project validators directly. Live provider/MFA, separate-connection contention, devices, load and full security acceptance remain NOT RUN.
+
 ## API documentation increment (2026-11-06)
 
 Issue [#19](https://github.com/ryuma2317/Next-Gen_LMS/issues/19), branch docs/api-contract from dev 7d3d4fa03e65fc3d6695db7297f5eecdab88982a. The quiz increment was merged through PR #17 and post-merge run 42056706944 passed its 103 automated tests, type checking and build. The older baseline/evidence sections below are historical.

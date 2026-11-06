@@ -20,7 +20,7 @@ export function buildOpenAPI() {
  for (const op of operations) {
   const handler = op.handler ?? op.path.replace(/\{([^}]+)\}/g, ':$1')
   const parameters = [...op.path.matchAll(/\{([^}]+)\}/g)].map(match => ({ name: match[1], in: 'path', required: true, schema: ref('UUID'), description: 'The UUID of this path resource, not a preview/demo ID.' }))
-  if (op.offset) parameters.push({ name: 'offset', in: 'query', required: false, schema: { type: 'integer', minimum: 0, maximum: 10000, default: 0 }, description: 'Row offset; response is a bare array. Work pages contain at most 50 rows, quiz reports at most 100. Stop on a shorter page. Query text must be 1–5 decimal digits.' })
+  if (op.offset) parameters.push({ name: 'offset', in: 'query', required: false, schema: { type: 'integer', minimum: 0, maximum: 10000, default: 0 }, description: 'Row offset; response is a bare array. Work, project-task and project-candidate pages contain at most 50 rows, quiz reports at most 100. Stop on a shorter page. Query text must be 1–5 decimal digits.' })
   const status = op.success ?? 200
   const response = { description: 'Successful response.', headers: noStore, content: json(op.response) }
   if (op.example) response.content['application/json'].example = op.example

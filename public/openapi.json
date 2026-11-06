@@ -26,6 +26,9 @@
     },
     {
       "name": "Quizzes"
+    },
+    {
+      "name": "Project boards"
     }
   ],
   "security": [
@@ -4736,7 +4739,7 @@
               "maximum": 10000,
               "default": 0
             },
-            "description": "Row offset; response is a bare array. Work pages contain at most 50 rows, quiz reports at most 100. Stop on a shorter page. Query text must be 1–5 decimal digits."
+            "description": "Row offset; response is a bare array. Work, project-task and project-candidate pages contain at most 50 rows, quiz reports at most 100. Stop on a shorter page. Query text must be 1–5 decimal digits."
           }
         ],
         "responses": {
@@ -7055,7 +7058,7 @@
               "maximum": 10000,
               "default": 0
             },
-            "description": "Row offset; response is a bare array. Work pages contain at most 50 rows, quiz reports at most 100. Stop on a shorter page. Query text must be 1–5 decimal digits."
+            "description": "Row offset; response is a bare array. Work, project-task and project-candidate pages contain at most 50 rows, quiz reports at most 100. Stop on a shorter page. Query text must be 1–5 decimal digits."
           }
         ],
         "responses": {
@@ -9357,6 +9360,2542 @@
         "x-handler-variant": "transition",
         "x-requires-mfa": true,
         "x-access-scope": "Assigned active section trainer with edit_learning and MFA (aal2). A role label alone grants no capability. Use the current run revision and reason. Timer expiry reveals automatically; teacher controls subsequent advancement. Equal scores share a rank and do not decide program awards."
+      }
+    },
+    "/api/editions/{id}/projects": {
+      "get": {
+        "operationId": "projectList",
+        "summary": "List my scoped project boards",
+        "tags": [
+          "Project boards"
+        ],
+        "description": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. At most 100 project boards per edition; empty scoped lists do not disclose other projects.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UUID"
+            },
+            "description": "The UUID of this path resource, not a preview/demo ID."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input, invalid identifier, unsupported fields or page.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign in with a valid Supabase user access token.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds the global 32768-byte body limit.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected failure; private error details are withheld.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required provider/configuration is unavailable or a database read failed.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "x-handler-route": "/api/editions/:id/projects",
+        "x-requires-mfa": false,
+        "x-access-scope": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. At most 100 project boards per edition; empty scoped lists do not disclose other projects."
+      },
+      "post": {
+        "operationId": "saveProject",
+        "summary": "Create or revise a project board configuration",
+        "tags": [
+          "Project boards"
+        ],
+        "description": "Explicit edition manage_projects plus MFA. No self-grant or automatic role-based grant. Live grants start empty and must follow the approved school/operator process. Supply all capacities and 2–8 unique columns explicitly. Used columns cannot be removed; capacities cannot shrink below active assignments.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UUID"
+            },
+            "description": "The UUID of this path resource, not a preview/demo ID."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ID"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input, invalid identifier, unsupported fields or page.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign in with a valid Supabase user access token.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds the global 32768-byte body limit.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Send Content-Type: application/json.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected failure; private error details are withheld.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required provider/configuration is unavailable or a database read failed.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "x-handler-route": "/api/editions/:id/projects",
+        "x-requires-mfa": true,
+        "x-access-scope": "Explicit edition manage_projects plus MFA. No self-grant or automatic role-based grant. Live grants start empty and must follow the approved school/operator process. Supply all capacities and 2–8 unique columns explicitly. Used columns cannot be removed; capacities cannot shrink below active assignments."
+      }
+    },
+    "/api/projects/{id}": {
+      "get": {
+        "operationId": "projectBoard",
+        "summary": "Read a permitted project board and assignments",
+        "tags": [
+          "Project boards"
+        ],
+        "description": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Returns explicit capacities, columns, active/revoked assignment rows and up to 100 sprint plans.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UUID"
+            },
+            "description": "The UUID of this path resource, not a preview/demo ID."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectBoard"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input, invalid identifier, unsupported fields or page.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign in with a valid Supabase user access token.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds the global 32768-byte body limit.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected failure; private error details are withheld.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required provider/configuration is unavailable or a database read failed.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "x-handler-route": "/api/projects/:id",
+        "x-requires-mfa": false,
+        "x-access-scope": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Returns explicit capacities, columns, active/revoked assignment rows and up to 100 sprint plans."
+      }
+    },
+    "/api/projects/{id}/tasks": {
+      "get": {
+        "operationId": "projectTasks",
+        "summary": "Read a page of project tasks",
+        "tags": [
+          "Project boards"
+        ],
+        "description": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Includes archived tasks. Filters in the client apply only to the loaded page. At most 10000 tasks per project.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UUID"
+            },
+            "description": "The UUID of this path resource, not a preview/demo ID."
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            },
+            "description": "Row offset; response is a bare array. Work, project-task and project-candidate pages contain at most 50 rows, quiz reports at most 100. Stop on a shorter page. Query text must be 1–5 decimal digits."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProjectTask"
+                  },
+                  "maxItems": 50
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input, invalid identifier, unsupported fields or page.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign in with a valid Supabase user access token.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds the global 32768-byte body limit.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected failure; private error details are withheld.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required provider/configuration is unavailable or a database read failed.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "x-handler-route": "/api/projects/:id/tasks",
+        "x-requires-mfa": false,
+        "x-access-scope": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Includes archived tasks. Filters in the client apply only to the loaded page. At most 10000 tasks per project."
+      },
+      "post": {
+        "operationId": "saveProjectTask",
+        "summary": "Create, edit or move a project task",
+        "tags": [
+          "Project boards"
+        ],
+        "description": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Task changes additionally require assigned can_tasks, unless authorized project oversight. Archived projects/tasks are read-only. New tasks use revision 0 and a stable request UUID for identical retries. Assignees must be active project participants, sprints belong to the same project, and new assignments cannot target closed sprints. Previously retained inactive/closed links remain historical.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UUID"
+            },
+            "description": "The UUID of this path resource, not a preview/demo ID."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectTaskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ID"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input, invalid identifier, unsupported fields or page.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign in with a valid Supabase user access token.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds the global 32768-byte body limit.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Send Content-Type: application/json.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected failure; private error details are withheld.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required provider/configuration is unavailable or a database read failed.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "x-handler-route": "/api/projects/:id/tasks",
+        "x-requires-mfa": false,
+        "x-access-scope": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Task changes additionally require assigned can_tasks, unless authorized project oversight. Archived projects/tasks are read-only. New tasks use revision 0 and a stable request UUID for identical retries. Assignees must be active project participants, sprints belong to the same project, and new assignments cannot target closed sprints. Previously retained inactive/closed links remain historical."
+      }
+    },
+    "/api/projects/{id}/candidates": {
+      "get": {
+        "operationId": "projectCandidates",
+        "summary": "Read active edition members for assignment",
+        "tags": [
+          "Project boards"
+        ],
+        "description": "Explicit edition manage_projects plus MFA. No self-grant or automatic role-based grant. Live grants start empty and must follow the approved school/operator process. No email, applicant answers or cross-edition directory is returned.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UUID"
+            },
+            "description": "The UUID of this path resource, not a preview/demo ID."
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            },
+            "description": "Row offset; response is a bare array. Work, project-task and project-candidate pages contain at most 50 rows, quiz reports at most 100. Stop on a shorter page. Query text must be 1–5 decimal digits."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProjectCandidate"
+                  },
+                  "maxItems": 50
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input, invalid identifier, unsupported fields or page.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign in with a valid Supabase user access token.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds the global 32768-byte body limit.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected failure; private error details are withheld.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required provider/configuration is unavailable or a database read failed.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "x-handler-route": "/api/projects/:id/candidates",
+        "x-requires-mfa": true,
+        "x-access-scope": "Explicit edition manage_projects plus MFA. No self-grant or automatic role-based grant. Live grants start empty and must follow the approved school/operator process. No email, applicant answers or cross-edition directory is returned."
+      }
+    },
+    "/api/project-tasks/{id}/thread": {
+      "get": {
+        "operationId": "projectThread",
+        "summary": "Read recent task comments and change history",
+        "tags": [
+          "Project boards"
+        ],
+        "description": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Latest 100 comments and 50 change records. Full stored snapshots are not exposed through this endpoint.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UUID"
+            },
+            "description": "The UUID of this path resource, not a preview/demo ID."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectThread"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input, invalid identifier, unsupported fields or page.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign in with a valid Supabase user access token.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds the global 32768-byte body limit.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected failure; private error details are withheld.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required provider/configuration is unavailable or a database read failed.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "x-handler-route": "/api/project-tasks/:id/thread",
+        "x-requires-mfa": false,
+        "x-access-scope": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Latest 100 comments and 50 change records. Full stored snapshots are not exposed through this endpoint."
+      }
+    },
+    "/api/projects/{id}/members": {
+      "post": {
+        "operationId": "saveProjectMember",
+        "summary": "Assign or revoke project-scoped access",
+        "tags": [
+          "Project boards"
+        ],
+        "description": "Explicit edition manage_projects plus MFA. No self-grant or automatic role-based grant. Live grants start empty and must follow the approved school/operator process. Active edition membership is required for activation. Participant/mentor/advisor capacities are independent. New member revision is 0. Archived boards permit revocation only: inactive, all rights false. This does not finalize team composition or grant an edition role.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UUID"
+            },
+            "description": "The UUID of this path resource, not a preview/demo ID."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectMemberRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Saved"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input, invalid identifier, unsupported fields or page.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign in with a valid Supabase user access token.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds the global 32768-byte body limit.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Send Content-Type: application/json.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected failure; private error details are withheld.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required provider/configuration is unavailable or a database read failed.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "x-handler-route": "/api/projects/:id/members",
+        "x-requires-mfa": true,
+        "x-access-scope": "Explicit edition manage_projects plus MFA. No self-grant or automatic role-based grant. Live grants start empty and must follow the approved school/operator process. Active edition membership is required for activation. Participant/mentor/advisor capacities are independent. New member revision is 0. Archived boards permit revocation only: inactive, all rights false. This does not finalize team composition or grant an edition role."
+      }
+    },
+    "/api/projects/{id}/archive": {
+      "post": {
+        "operationId": "archiveProject",
+        "summary": "Make a project board read-only",
+        "tags": [
+          "Project boards"
+        ],
+        "description": "Explicit edition manage_projects plus MFA. No self-grant or automatic role-based grant. Live grants start empty and must follow the approved school/operator process. Current project revision and reason required. Records and permitted reads remain; reopening is not implemented.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UUID"
+            },
+            "description": "The UUID of this path resource, not a preview/demo ID."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Saved"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input, invalid identifier, unsupported fields or page.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign in with a valid Supabase user access token.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds the global 32768-byte body limit.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Send Content-Type: application/json.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected failure; private error details are withheld.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required provider/configuration is unavailable or a database read failed.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "x-handler-route": "/api/projects/:id/archive",
+        "x-requires-mfa": true,
+        "x-access-scope": "Explicit edition manage_projects plus MFA. No self-grant or automatic role-based grant. Live grants start empty and must follow the approved school/operator process. Current project revision and reason required. Records and permitted reads remain; reopening is not implemented."
+      }
+    },
+    "/api/project-tasks/{id}/archive": {
+      "post": {
+        "operationId": "archiveProjectTask",
+        "summary": "Archive a task without deleting history",
+        "tags": [
+          "Project boards"
+        ],
+        "description": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Task changes additionally require assigned can_tasks, unless authorized project oversight. Archived projects/tasks are read-only. Current task revision and reason required.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UUID"
+            },
+            "description": "The UUID of this path resource, not a preview/demo ID."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Saved"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input, invalid identifier, unsupported fields or page.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign in with a valid Supabase user access token.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds the global 32768-byte body limit.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Send Content-Type: application/json.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected failure; private error details are withheld.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required provider/configuration is unavailable or a database read failed.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "x-handler-route": "/api/project-tasks/:id/archive",
+        "x-requires-mfa": false,
+        "x-access-scope": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Task changes additionally require assigned can_tasks, unless authorized project oversight. Archived projects/tasks are read-only. Current task revision and reason required."
+      }
+    },
+    "/api/project-tasks/{id}/comments": {
+      "post": {
+        "operationId": "commentProjectTask",
+        "summary": "Append a plain-text task comment",
+        "tags": [
+          "Project boards"
+        ],
+        "description": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Requires explicitly assigned can_comment or authorized oversight; project/task must be active. Identical UUID/task/author/body retries are idempotent; a reused UUID cannot overwrite a comment.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UUID"
+            },
+            "description": "The UUID of this path resource, not a preview/demo ID."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectCommentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Saved"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input, invalid identifier, unsupported fields or page.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign in with a valid Supabase user access token.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds the global 32768-byte body limit.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Send Content-Type: application/json.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected failure; private error details are withheld.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required provider/configuration is unavailable or a database read failed.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "x-handler-route": "/api/project-tasks/:id/comments",
+        "x-requires-mfa": false,
+        "x-access-scope": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Requires explicitly assigned can_comment or authorized oversight; project/task must be active. Identical UUID/task/author/body retries are idempotent; a reused UUID cannot overwrite a comment."
+      }
+    },
+    "/api/projects/{id}/sprints": {
+      "post": {
+        "operationId": "saveProjectSprint",
+        "summary": "Create or edit a sprint plan",
+        "tags": [
+          "Project boards"
+        ],
+        "description": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Requires can_sprints or authorized oversight and an unarchived project. Supply explicit dates; only planned sprints may be edited. At most 100 plans per project.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UUID"
+            },
+            "description": "The UUID of this path resource, not a preview/demo ID."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectSprintRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ID"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input, invalid identifier, unsupported fields or page.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign in with a valid Supabase user access token.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds the global 32768-byte body limit.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Send Content-Type: application/json.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected failure; private error details are withheld.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required provider/configuration is unavailable or a database read failed.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "x-handler-route": "/api/projects/:id/sprints",
+        "x-requires-mfa": false,
+        "x-access-scope": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Requires can_sprints or authorized oversight and an unarchived project. Supply explicit dates; only planned sprints may be edited. At most 100 plans per project."
+      }
+    },
+    "/api/project-sprints/{id}/start": {
+      "post": {
+        "operationId": "projectSprintStart",
+        "summary": "Start a planned sprint",
+        "tags": [
+          "Project boards"
+        ],
+        "description": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Requires can_sprints or authorized oversight, current sprint revision and reason. Only one active sprint per project. Closing retains incomplete work and performs no automatic carryover or grading.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UUID"
+            },
+            "description": "The UUID of this path resource, not a preview/demo ID."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Saved"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input, invalid identifier, unsupported fields or page.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign in with a valid Supabase user access token.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource is unavailable. Private details are not disclosed.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds the global 32768-byte body limit.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Send Content-Type: application/json.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected failure; private error details are withheld.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required provider/configuration is unavailable or a database read failed.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "x-handler-route": "/api/project-sprints/:id/:action",
+        "x-handler-variant": "start",
+        "x-requires-mfa": false,
+        "x-access-scope": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Requires can_sprints or authorized oversight, current sprint revision and reason. Only one active sprint per project. Closing retains incomplete work and performs no automatic carryover or grading."
+      }
+    },
+    "/api/project-sprints/{id}/close": {
+      "post": {
+        "operationId": "projectSprintClose",
+        "summary": "Close the active sprint",
+        "tags": [
+          "Project boards"
+        ],
+        "description": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Requires can_sprints or authorized oversight, current sprint revision and reason. Only one active sprint per project. Closing retains incomplete work and performs no automatic carryover or grading.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UUID"
+            },
+            "description": "The UUID of this path resource, not a preview/demo ID."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Saved"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input, invalid identifier, unsupported fields or page.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign in with a valid Supabase user access token.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource is unavailable. Private details are not disclosed.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds the global 32768-byte body limit.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Send Content-Type: application/json.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected failure; private error details are withheld.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required provider/configuration is unavailable or a database read failed.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "x-handler-route": "/api/project-sprints/:id/:action",
+        "x-handler-variant": "close",
+        "x-requires-mfa": false,
+        "x-access-scope": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Requires can_sprints or authorized oversight, current sprint revision and reason. Only one active sprint per project. Closing retains incomplete work and performs no automatic carryover or grading."
       }
     }
   },
@@ -12734,6 +15273,781 @@
           "version",
           "action",
           "reason"
+        ],
+        "additionalProperties": false
+      },
+      "ProjectColumn": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 40,
+            "pattern": "^(?!(?:constructor|prototype)$)[a-z][a-z0-9_]{0,39}$"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1
+          },
+          "complete": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "complete"
+        ],
+        "additionalProperties": false
+      },
+      "ProjectLimits": {
+        "type": "object",
+        "properties": {
+          "participant": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "mentor": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "advisor": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          }
+        },
+        "required": [
+          "participant",
+          "mentor",
+          "advisor"
+        ],
+        "additionalProperties": false
+      },
+      "ProjectFields": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1
+          },
+          "theme": {
+            "type": "string",
+            "maxLength": 3000,
+            "description": "Plain text. Server code-unit, UTF-8 byte and control-character bounds also apply."
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectColumn"
+            },
+            "minItems": 2,
+            "maxItems": 8
+          },
+          "limits": {
+            "$ref": "#/components/schemas/ProjectLimits"
+          }
+        },
+        "required": [
+          "title",
+          "theme",
+          "columns",
+          "limits"
+        ],
+        "additionalProperties": false
+      },
+      "ProjectSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+            "example": "00000000-0000-4000-8000-000000000001"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 160
+          },
+          "theme": {
+            "type": "string",
+            "maxLength": 3000,
+            "description": "Plain text. Server code-unit, UTF-8 byte and control-character bounds also apply."
+          },
+          "archived": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647,
+            "description": "Use the current server revision. NULL/stale input cannot overwrite newer state."
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "theme",
+          "archived",
+          "version"
+        ],
+        "additionalProperties": false
+      },
+      "ProjectList": {
+        "type": "object",
+        "properties": {
+          "can_manage": {
+            "type": "boolean"
+          },
+          "projects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectSummary"
+            },
+            "maxItems": 100
+          }
+        },
+        "required": [
+          "can_manage",
+          "projects"
+        ],
+        "additionalProperties": false
+      },
+      "ProjectMember": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+            "example": "00000000-0000-4000-8000-000000000001"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "participant",
+              "mentor",
+              "advisor"
+            ]
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647,
+            "description": "Use the current server revision. NULL/stale input cannot overwrite newer state."
+          },
+          "can_tasks": {
+            "type": "boolean"
+          },
+          "can_comment": {
+            "type": "boolean"
+          },
+          "can_sprints": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "user_id",
+          "display_name",
+          "role",
+          "active",
+          "version",
+          "can_tasks",
+          "can_comment",
+          "can_sprints"
+        ],
+        "additionalProperties": false
+      },
+      "ProjectSprint": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+            "example": "00000000-0000-4000-8000-000000000001"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 160
+          },
+          "goal": {
+            "type": "string",
+            "maxLength": 3000,
+            "description": "Plain text. Server code-unit, UTF-8 byte and control-character bounds also apply."
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Send an ISO timestamp including a UTC offset. Stored times are absolute; scheduling inputs use device-local time."
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Send an ISO timestamp including a UTC offset. Stored times are absolute; scheduling inputs use device-local time."
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "planned",
+              "active",
+              "closed"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647,
+            "description": "Use the current server revision. NULL/stale input cannot overwrite newer state."
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "goal",
+          "starts_at",
+          "ends_at",
+          "state",
+          "version"
+        ],
+        "additionalProperties": false
+      },
+      "ProjectBoard": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+            "example": "00000000-0000-4000-8000-000000000001"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 160
+          },
+          "theme": {
+            "type": "string",
+            "maxLength": 3000,
+            "description": "Plain text. Server code-unit, UTF-8 byte and control-character bounds also apply."
+          },
+          "archived": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647,
+            "description": "Use the current server revision. NULL/stale input cannot overwrite newer state."
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectColumn"
+            },
+            "minItems": 2,
+            "maxItems": 8
+          },
+          "limits": {
+            "$ref": "#/components/schemas/ProjectLimits"
+          },
+          "can_manage": {
+            "type": "boolean"
+          },
+          "can_tasks": {
+            "type": "boolean"
+          },
+          "can_comment": {
+            "type": "boolean"
+          },
+          "can_sprints": {
+            "type": "boolean"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectMember"
+            },
+            "maxItems": 1000
+          },
+          "sprints": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectSprint"
+            },
+            "maxItems": 100
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "theme",
+          "archived",
+          "version",
+          "columns",
+          "limits",
+          "can_manage",
+          "can_tasks",
+          "can_comment",
+          "can_sprints",
+          "members",
+          "sprints"
+        ],
+        "additionalProperties": false
+      },
+      "ProjectCandidate": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+            "example": "00000000-0000-4000-8000-000000000001"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "trainee",
+                "trainer",
+                "volunteer",
+                "organizer",
+                "admin",
+                "super_admin",
+                "mentor",
+                "advisor"
+              ]
+            }
+          }
+        },
+        "required": [
+          "user_id",
+          "display_name",
+          "roles"
+        ],
+        "additionalProperties": false
+      },
+      "ProjectTaskFields": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 6000,
+            "description": "Plain text. Server code-unit, UTF-8 byte and control-character bounds also apply."
+          },
+          "column_id": {
+            "type": "string",
+            "maxLength": 40,
+            "pattern": "^(?!(?:constructor|prototype)$)[a-z][a-z0-9_]{0,39}$"
+          },
+          "assignee_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+                "example": "00000000-0000-4000-8000-000000000001"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sprint_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+                "example": "00000000-0000-4000-8000-000000000001"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "title",
+          "description",
+          "column_id",
+          "assignee_id",
+          "sprint_id"
+        ],
+        "additionalProperties": false
+      },
+      "ProjectTask": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+            "example": "00000000-0000-4000-8000-000000000001"
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+            "example": "00000000-0000-4000-8000-000000000001"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 160
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 6000,
+            "description": "Plain text. Server code-unit, UTF-8 byte and control-character bounds also apply."
+          },
+          "column_id": {
+            "type": "string",
+            "maxLength": 40,
+            "pattern": "^(?!(?:constructor|prototype)$)[a-z][a-z0-9_]{0,39}$"
+          },
+          "assignee_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+                "example": "00000000-0000-4000-8000-000000000001"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sprint_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+                "example": "00000000-0000-4000-8000-000000000001"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "archived": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647,
+            "description": "Use the current server revision. NULL/stale input cannot overwrite newer state."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Send an ISO timestamp including a UTC offset. Stored times are absolute; scheduling inputs use device-local time."
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Send an ISO timestamp including a UTC offset. Stored times are absolute; scheduling inputs use device-local time."
+          }
+        },
+        "required": [
+          "id",
+          "project_id",
+          "title",
+          "description",
+          "column_id",
+          "assignee_id",
+          "sprint_id",
+          "archived",
+          "version",
+          "created_at",
+          "updated_at"
+        ],
+        "additionalProperties": false
+      },
+      "ProjectThread": {
+        "type": "object",
+        "properties": {
+          "comments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+                  "example": "00000000-0000-4000-8000-000000000001"
+                },
+                "author": {
+                  "type": "string"
+                },
+                "body": {
+                  "type": "string",
+                  "maxLength": 3000,
+                  "description": "Plain text. Server code-unit, UTF-8 byte and control-character bounds also apply."
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Send an ISO timestamp including a UTC offset. Stored times are absolute; scheduling inputs use device-local time."
+                }
+              },
+              "required": [
+                "id",
+                "author",
+                "body",
+                "created_at"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 100
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "version": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 2147483647,
+                  "description": "Use the current server revision. NULL/stale input cannot overwrite newer state."
+                },
+                "actor": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string",
+                  "enum": [
+                    "created",
+                    "updated",
+                    "moved",
+                    "archived"
+                  ]
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Send an ISO timestamp including a UTC offset. Stored times are absolute; scheduling inputs use device-local time."
+                }
+              },
+              "required": [
+                "version",
+                "actor",
+                "action",
+                "created_at"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 50
+          }
+        },
+        "required": [
+          "comments",
+          "changes"
+        ],
+        "additionalProperties": false
+      },
+      "ProjectRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+            "example": "00000000-0000-4000-8000-000000000001"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "0 creates a draft with a new client UUID; use the latest positive revision for updates."
+          },
+          "project": {
+            "$ref": "#/components/schemas/ProjectFields"
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "project"
+        ],
+        "additionalProperties": false
+      },
+      "ProjectMemberRequest": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+            "example": "00000000-0000-4000-8000-000000000001"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "0 creates a draft with a new client UUID; use the latest positive revision for updates."
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "participant",
+              "mentor",
+              "advisor"
+            ]
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "canTasks": {
+            "type": "boolean"
+          },
+          "canComment": {
+            "type": "boolean"
+          },
+          "canSprints": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "Plain text. Server code-unit, UTF-8 byte and control-character bounds also apply."
+          }
+        },
+        "required": [
+          "userId",
+          "version",
+          "role",
+          "active",
+          "canTasks",
+          "canComment",
+          "canSprints",
+          "reason"
+        ],
+        "additionalProperties": false
+      },
+      "ProjectTaskRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+            "example": "00000000-0000-4000-8000-000000000001"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "0 creates a draft with a new client UUID; use the latest positive revision for updates."
+          },
+          "task": {
+            "$ref": "#/components/schemas/ProjectTaskFields"
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "task"
+        ],
+        "additionalProperties": false
+      },
+      "ProjectCommentRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+            "example": "00000000-0000-4000-8000-000000000001"
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 3000,
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "body"
+        ],
+        "additionalProperties": false
+      },
+      "ProjectSprintFields": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1
+          },
+          "goal": {
+            "type": "string",
+            "maxLength": 3000,
+            "description": "Plain text. Server code-unit, UTF-8 byte and control-character bounds also apply."
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Send an ISO timestamp including a UTC offset. Stored times are absolute; scheduling inputs use device-local time."
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Send an ISO timestamp including a UTC offset. Stored times are absolute; scheduling inputs use device-local time."
+          }
+        },
+        "required": [
+          "title",
+          "goal",
+          "startsAt",
+          "endsAt"
+        ],
+        "additionalProperties": false
+      },
+      "ProjectSprintRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+            "example": "00000000-0000-4000-8000-000000000001"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "0 creates a draft with a new client UUID; use the latest positive revision for updates."
+          },
+          "sprint": {
+            "$ref": "#/components/schemas/ProjectSprintFields"
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "sprint"
         ],
         "additionalProperties": false
       }
