@@ -7,7 +7,9 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
-    "check": "tsc --noEmit",
+    "check": "npm run check:api && tsc --noEmit",
+    "docs:api": "node scripts/build-api-docs.mjs",
+    "check:api": "node scripts/build-api-docs.mjs --check",
     "test": "npm run test:domain && vitest run",
     "test:domain": "node --experimental-strip-types --test tests/*.test.mjs",
     "test:e2e": "playwright test",

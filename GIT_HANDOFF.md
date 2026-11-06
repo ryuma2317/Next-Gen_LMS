@@ -1,5 +1,11 @@
 # Git handover result
 
+## Current continuation: API contract
+
+2026-11-06: the quiz PR #17 was merged into dev at 7d3d4fa03e65fc3d6695db7297f5eecdab88982a; post-merge run 42056706944 passed. Main remains unchanged.
+
+Issue [#19](https://github.com/ryuma2317/Next-Gen_LMS/issues/19) tracks API_GUIDE.md, generated public/openapi.json and contract checks on docs/api-contract, prepared in tmp/api-docs-handoff from that dev commit. Original checkout Git metadata stays read-only. Local native tests pass (32); publication and full CI are pending at this source snapshot. Record the actual remote commit/PR/check results after they exist. Direct Apidog workspace import has not run; no account settings or credentials were changed.
+
 Updated 2026-11-05. Repository: `ryuma2317/Next-Gen_LMS`.
 
 Latest quiz continuation: [PR #17](https://github.com/ryuma2317/Next-Gen_LMS/pull/17), branch feat/quiz-modes from dev, contains exam/live-game modes with private server grading and advisory monitoring. [Run 41994150546](https://github.com/ryuma2317/Next-Gen_LMS/actions/runs/41994150546) passes 103 tests, type checking and build on 87e6bd0a89dc7c439fb64d9960c27935e84b3e8e. Exact-head review/merge status is recorded in [#16](https://github.com/ryuma2317/Next-Gen_LMS/issues/16); report access hardening is [#18](https://github.com/ryuma2317/Next-Gen_LMS/issues/18). No live deployment is implied. Prepared feature checkout: tmp/quiz-handoff; the root Git metadata remains untouched. Apply all migrations through 012 for these quiz sources.

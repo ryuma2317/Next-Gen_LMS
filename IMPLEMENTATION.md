@@ -1,5 +1,13 @@
 # Implementation and next steps
 
+## API documentation increment (2026-11-06)
+
+Issue [#19](https://github.com/ryuma2317/Next-Gen_LMS/issues/19), branch docs/api-contract from dev 7d3d4fa03e65fc3d6695db7297f5eecdab88982a. The quiz increment was merged through PR #17 and post-merge run 42056706944 passed its 103 automated tests, type checking and build. The older baseline/evidence sections below are historical.
+
+API_GUIDE.md explains APIs, safe local requests and Apidog import for new maintainers. Sources in api/ generate public/openapi.json: 55 implemented HTTP operations, payload schemas, concrete action/resource variants, access/MFA descriptions and current error behavior. No dependencies, service subscriptions, migrations or runtime business rules change.
+
+Local evidence: 32 native tests PASS, including five contract/reference/route/security/fixture checks; generated artifact matches sources. Eight new HTTP contract tests and assertions against actual PGlite quiz results are written. Full type/API/database/build/browser CI for this increment is pending publication; do not call those checks passed until its run completes. Direct Apidog import was NOT RUN because desktop automation failed to initialize; the import file does not contain credentials. See API_GUIDE.md for the bounded schema matcher's limits and outstanding provider/device/load/security work.
+
 Current development baseline: **dev**, with the existing stack merged through [PR #12](https://github.com/ryuma2317/Next-Gen_LMS/pull/12) at `07164d9dc2da8bef1adac0c0564d547ce10ca4ad`. Pre-merge CI on the exact head and post-merge [dev CI run 41984710266](https://github.com/ryuma2317/Next-Gen_LMS/actions/runs/41984710266) passed installation, type checking, 74 automated tests and the production client/Worker build. See DEV_REVIEW.md and GIT_HANDOFF.md. The historical notes below record each earlier increment; live acceptance and unfinished program modules remain pending.
 
 ## Build 0.1 — foundation

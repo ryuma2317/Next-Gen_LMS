@@ -6,6 +6,7 @@ Development workspace for the yearly CADT Next-Gen Engagement program. Build 0.4
 
 | Document | Purpose |
 | --- | --- |
+| [API_GUIDE.md](API_GUIDE.md) | Beginner API explanation, Apidog import and contract maintenance. |
 | [LMS_PLAN.md](LMS_PLAN.md) | Program requirements, architecture and delivery plan. |
 | [UX_BLUEPRINT.md](UX_BLUEPRINT.md) | User workspaces, journeys and scenario coverage. |
 | [QUIZZES.md](QUIZZES.md) | Exam/live-game requirements, implementation bounds and monitoring limits. |

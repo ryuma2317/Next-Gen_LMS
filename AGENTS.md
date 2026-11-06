@@ -12,6 +12,7 @@ The entire LMS is not finished. Default screens use synthetic data. Local npm ac
 - Preserve annual history and separate teaching/project memberships. No participant may overwrite another's seat. Do not invent jury scoring weights, tie-breaks, retention periods or an award-priority algorithm.
 - Keep real applicants, private PDFs, extracted reference content, secrets and exports out of Git and public issue/PR evidence.
 - Add forward migrations; do not rewrite deployed migration history. Run relevant checks and record PASS/FAIL/BLOCKED/NOT RUN truthfully.
+- Keep the HTTP contract in api/operations.mjs and api/schemas.mjs synchronized with route/DTO changes. Regenerate public/openapi.json with npm run docs:api; check:api and native route/security coverage must pass. API_GUIDE.md explains Apidog import and verification limits. Never include live tokens/private receipt proofs in examples or exported API environments.
 
 ## GitHub workflow requested by owner
 
