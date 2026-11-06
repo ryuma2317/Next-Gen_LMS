@@ -39,6 +39,7 @@ it('creates configured projects with identical UUID retries and keeps unassigned
  await expect(asUser(outsider,'select public.project_board($1)',[project])).rejects.toThrow()
  await expect(asUser(crossEdition,'select public.project_board($1)',[project])).rejects.toThrow()
  await expect(asUser(manager,'select public.save_project($1,$2,null,$3)',[project,edition,JSON.stringify(fields())])).rejects.toThrow()
+ await expect(asUser(manager,'select public.save_project($1,$2,0,$3)',[id(70),edition,JSON.stringify({...fields(),columns:[fields().columns[0],fields().columns[0]]})])).rejects.toThrow('Duplicate columns')
  schema('ProjectList',(await asUser(manager,'select public.project_list($1) result',[edition])).rows[0].result)
 })
 it('assigns independent roles/capacities, rejects foreign-year users and bounds roster disclosure',async()=>{
