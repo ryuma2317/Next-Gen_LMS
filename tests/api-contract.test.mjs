@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import { buildOpenAPI, serializeOpenAPI } from '../api/openapi.mjs'
 import { assertSchema } from './helpers/schema-match.mjs'
 const read = path => readFileSync(new URL('../'+path,import.meta.url),'utf8').replace(/\r\n/g,'\n')
@@ -45,11 +45,17 @@ test('only the four intended public operations opt out of Bearer authentication'
   assert.equal(entries.find(op=>op.operationId===name)['x-requires-mfa'],true,name)
 })
 test('every registered Hono endpoint and concrete action/resource variant is documented',()=>{
- const sources = ['index','admissions','attendance','learning','quizzes'].map(name=>read('server/'+name+'.ts')).join('\n')
+ const sources = readdirSync(new URL('../server/',import.meta.url)).filter(name=>name.endsWith('.ts')).sort().map(name=>read('server/'+name)).join('\n')
+ const routers = [...sources.matchAll(/export const (\w+)\s*=\s*new Hono/g)].map(m=>m[1])
+ assert(routers.includes('app'))
+ const mounts = new Map([...sources.matchAll(/app\.route\('([^']+)',\s*(\w+)\)/g)].map(m=>[m[2],m[1]]))
+ for(const router of routers) if(router!=='app') assert(mounts.has(router),'Unmapped Hono router: '+router)
  const routes = new Map()
- const matches = [...sources.matchAll(/\b(app|publicAdmissions|admissions|attendance|learning|quizzes)\.(get|post|put|patch|delete)\('([^']+)'/g)]
+ const registration = new RegExp('\\b('+routers.join('|')+')\\.(get|post|put|patch|delete)\\(\\x27([^\\x27]+)\\x27','g')
+ const matches = [...sources.matchAll(registration)]
+ assert(matches.length,'No registered routes found; review the coverage parser if the routing style changed')
  for (let index=0;index<matches.length;index++) {
-  const match=matches[index], prefix=match[1]==='app'?'':match[1]==='publicAdmissions'?'/api/public':'/api'
+  const match=matches[index], prefix=match[1]==='app'?'':mounts.get(match[1])
   const path=prefix+match[3], method=match[2], key=method+' '+path
   const body=sources.slice(match.index,(matches[index+1]?.index ?? sources.length))
   const variants=new Set([...body.matchAll(/\b(?:action|resource)\s*(?:===|!==)\s*'([^']+)'/g)].map(m=>m[1]))

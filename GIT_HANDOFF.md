@@ -4,7 +4,7 @@
 
 2026-11-06: the quiz PR #17 was merged into dev at 7d3d4fa03e65fc3d6695db7297f5eecdab88982a; post-merge run 42056706944 passed. Main remains unchanged.
 
-Issue [#19](https://github.com/ryuma2317/Next-Gen_LMS/issues/19) tracks API_GUIDE.md, generated public/openapi.json and contract checks on docs/api-contract, prepared in tmp/api-docs-handoff from that dev commit. Original checkout Git metadata stays read-only. Local native tests pass (32); publication and full CI are pending at this source snapshot. Record the actual remote commit/PR/check results after they exist. Direct Apidog workspace import has not run; no account settings or credentials were changed.
+Issue [#19](https://github.com/ryuma2317/Next-Gen_LMS/issues/19) tracks API_GUIDE.md, generated public/openapi.json and contract checks on docs/api-contract, prepared in tmp/api-docs-handoff from that dev commit. Original checkout Git metadata stays read-only. Published source f6b6ec677881eb40e5051024986a1729ce673a9a has tree ec88710a034d76b163dfee9d2d97d7fcb00e54e5, verified identical to the prepared local tree. Its original local commit 11fdf23eab35e6bd03fb5f892daec623ec3ea4e3 is preserved under archive/local-api-docs-first. Remote [PR #20](https://github.com/ryuma2317/Next-Gen_LMS/pull/20) targets dev. [Run 42162605308](https://github.com/ryuma2317/Next-Gen_LMS/actions/runs/42162605308) passes 116 tests, type checking and client/Worker build. Follow-up review still requires final-head CI before the authorized dev merge; this source snapshot does not claim that merge has occurred. Direct Apidog workspace import has not run; no account settings or credentials were changed.
 
 Updated 2026-11-05. Repository: `ryuma2317/Next-Gen_LMS`.
 

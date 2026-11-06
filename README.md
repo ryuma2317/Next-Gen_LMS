@@ -2,6 +2,8 @@
 
 Development workspace for the yearly CADT Next-Gen Engagement program. Build 0.4 includes initial selection, admissions, attendance, lesson, assignment/submission, grading and initial exam/live-game quiz sources. Live configuration and verification remain pending; it is not ready for real participants.
 
+API documentation now covers all 55 implemented HTTP operations. Import [public/openapi.json](public/openapi.json) into Apidog and follow [API_GUIDE.md](API_GUIDE.md). Documentation-source CI run 42162605308 passes 116 automated tests, type checking and build; actual Apidog workspace import and live provider/security acceptance remain unverified. Earlier evidence sections below are historical.
+
 ## Start here
 
 | Document | Purpose |

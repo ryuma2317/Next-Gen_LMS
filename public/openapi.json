@@ -977,6 +977,25 @@
               }
             }
           },
+          "404": {
+            "description": "Resource is unavailable. Private details are not disclosed.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "409": {
             "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
             "headers": {
