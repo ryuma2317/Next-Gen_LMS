@@ -1,6 +1,9 @@
 import {beforeAll,afterAll,it,expect} from 'vitest'
 import {PGlite} from '@electric-sql/pglite'
 import {readFile,readdir} from 'node:fs/promises'
+import document from '../public/openapi.json'
+import {assertSchema} from './helpers/schema-match.mjs'
+const schema=(name:string,value:unknown)=>assertSchema({$ref:'#/components/schemas/'+name},value,document)
 const db=new PGlite()
 const id=(n:number)=>'99000000-0000-0000-0000-'+String(n).padStart(12,'0')
 const edition=id(1),section=id(2),offering=id(3),teacher=id(4),student=id(5),peer=id(6),outsider=id(7),exam=id(8),attempt=id(9),game=id(10),run=id(11)
@@ -31,6 +34,8 @@ it('keeps drafts/keys private and requires assigned editing permission/MFA and f
  await asUser(teacher,"select public.quiz_transition($1,1,'publish','Reviewed all settings')",[exam])
  const list=await asUser(student,'select * from public.quiz_list($1)',[section])
  expect(list.rows[0].quiz_list).toHaveLength(1)
+ schema('QuizSummary',list.rows[0].quiz_list[0])
+ schema('QuizDefinition',(await asUser(teacher,'select public.quiz_definition($1) result',[exam])).rows[0].result)
  expect(Object.keys(list.rows[0].quiz_list[0]).sort()).toEqual(['id','section_id','title','description','mode','config','state','version','released','can_edit','can_report','can_participate'].sort())
  expect(list.rows[0].quiz_list[0]).not.toHaveProperty('questions')
  await expect(asUser(teacher,'select public.save_quiz($1,$2,2,$3)',[exam,section,JSON.stringify(fields())])).rejects.toThrow()
@@ -39,6 +44,7 @@ it('starts/resumes own attempts with server timing, no keys and cross-class deni
  await expect(asUser(outsider,'select public.start_quiz_attempt($1,$2)',[exam,id(50)])).rejects.toThrow()
  const first=(await asUser(student,'select public.start_quiz_attempt($1,$2) result',[exam,attempt])).rows[0].result
  expect(first.status).toBe('active');expect(first.score_units).toBeNull();expect(JSON.stringify(first)).not.toContain('"correct"')
+ schema('QuizAttempt',first)
  const duplicate=(await asUser(student,'select public.start_quiz_attempt($1,$2) result',[exam,id(51)])).rows[0].result;expect(duplicate.id).toBe(attempt)
  await expect(asUser(peer,'select public.quiz_attempt($1)',[attempt])).rejects.toThrow()
 })
@@ -51,6 +57,7 @@ it('grades only accepted selected options, rejects stale/null writes and keeps u
  await asUser(student,'select public.record_quiz_signal($1,$2,$3)',[attempt,id(55),'hidden'])
  const submitted=(await asUser(student,'select public.save_quiz_attempt($1,2,$2,true) result',[attempt,JSON.stringify({q_one:['a']})])).rows[0].result;expect(submitted.status).toBe('submitted');expect(submitted.score_units).toBeNull();expect(submitted.flags).toBe(1)
  const report=(await asUser(teacher,'select public.quiz_report($1) result',[exam])).rows[0].result;expect(report[0].score_units).toBe(1000)
+ schema('QuizReportRow',report[0])
  await expect(asUser(peer,'select public.quiz_report($1)',[exam])).rejects.toThrow()
  await asUser(teacher,"select public.quiz_transition($1,2,'release','Release reviewed results')",[exam])
  expect((await asUser(student,'select public.quiz_attempt($1) result',[attempt])).rows[0].result.score_units).toBe(1000)
@@ -71,6 +78,7 @@ it('live games scope joining/hosting, hide keys, reject late/duplicate replaceme
  await expect(asUser(student,"select public.quiz_run_transition($1,1,'next','Unauthorized')",[run])).rejects.toThrow()
  await asUser(teacher,"select public.quiz_run_transition($1,1,'next','Start question')",[run])
  const open=(await asUser(student,'select public.quiz_run_view($1) result',[run])).rows[0].result;expect(open.correct).toBeNull();expect(open.question.correct).toBeUndefined();expect(open.standings).toEqual([])
+ schema('GameView',open)
  await expect(asUser(peer,'select public.join_quiz_run($1)',[run])).rejects.toThrow()
  await asUser(student,'select public.answer_quiz_run($1,0,$2)',[run,'["a"]'])
  await asUser(student,'select public.answer_quiz_run($1,0,$2)',[run,'["a"]'])
@@ -78,6 +86,7 @@ it('live games scope joining/hosting, hide keys, reject late/duplicate replaceme
  await expect(asUser(teacher,"select public.quiz_run_transition($1,null,'reveal','Stale')",[run])).rejects.toThrow()
  await asUser(teacher,"select public.quiz_run_transition($1,2,'reveal','Reveal question')",[run])
  const reveal=(await asUser(student,'select public.quiz_run_view($1) result',[run])).rows[0].result;expect(reveal.correct).toEqual(['a']);expect(reveal.standings[0].score_units).toBe(1000)
+ schema('GameView',reveal)
  await asUser(teacher,"select public.quiz_run_transition($1,3,'next','Finish')",[run])
  expect((await asUser(student,'select public.quiz_run_view($1) result',[run])).rows[0].result.phase).toBe('finished')
 })

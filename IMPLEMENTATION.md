@@ -1,5 +1,15 @@
 # Implementation and next steps
 
+## API documentation increment (2026-11-06)
+
+Issue [#19](https://github.com/ryuma2317/Next-Gen_LMS/issues/19), branch docs/api-contract from dev 7d3d4fa03e65fc3d6695db7297f5eecdab88982a. The quiz increment was merged through PR #17 and post-merge run 42056706944 passed its 103 automated tests, type checking and build. The older baseline/evidence sections below are historical.
+
+API_GUIDE.md explains APIs, safe local requests and Apidog import for new maintainers. Sources in api/ generate public/openapi.json: 55 implemented HTTP operations, payload schemas, concrete action/resource variants, access/MFA descriptions and current error behavior. No dependencies, service subscriptions, migrations or runtime business rules change.
+
+Evidence: 32 native tests PASS locally, including five contract/reference/route/security/fixture checks. [CI run 42162605308](https://github.com/ryuma2317/Next-Gen_LMS/actions/runs/42162605308) passed on f6b6ec677881eb40e5051024986a1729ce673a9a: artifact freshness, npm ci, type checking, 32 domain + 60 Vitest API/PGlite + 24 Chromium preview tests (116 total), and client/Worker build. Eight new HTTP tests and actual PGlite quiz projections check response shapes, null/private fields and errors. Follow-up review documents the existing public-submission 404 and discovers mounted Hono modules dynamically for route coverage; exact final-head CI remains required before merging [PR #20](https://github.com/ryuma2317/Next-Gen_LMS/pull/20).
+
+Direct Apidog import was NOT RUN because desktop automation failed to initialize; the import file contains no credentials. No provider/deployment/account changes were made. See API_GUIDE.md for the bounded schema matcher's limits and outstanding provider/device/load/security work.
+
 Current development baseline: **dev**, with the existing stack merged through [PR #12](https://github.com/ryuma2317/Next-Gen_LMS/pull/12) at `07164d9dc2da8bef1adac0c0564d547ce10ca4ad`. Pre-merge CI on the exact head and post-merge [dev CI run 41984710266](https://github.com/ryuma2317/Next-Gen_LMS/actions/runs/41984710266) passed installation, type checking, 74 automated tests and the production client/Worker build. See DEV_REVIEW.md and GIT_HANDOFF.md. The historical notes below record each earlier increment; live acceptance and unfinished program modules remain pending.
 
 ## Build 0.1 — foundation

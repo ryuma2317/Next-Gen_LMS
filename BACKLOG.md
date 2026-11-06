@@ -1,5 +1,7 @@
 # GitHub issue queue
 
+Current documentation increment: [#19](https://github.com/ryuma2317/Next-Gen_LMS/issues/19), docs/api-contract. Acceptance covers a beginner API guide, all implemented operations in an Apidog-importable OpenAPI 3.1 artifact, authentication/scope/revision/error documentation, automatic route/reference/security/artifact checks and representative HTTP/database contract evidence. Direct Apidog import and production acceptance must be reported separately. See API_GUIDE.md.
+
 Issue bodies are prepared in `.github/handoff`. The connector recovered on 2026-11-05 and [verification issue #1](https://github.com/ryuma2317/Next-Gen_LMS/issues/1) now exists; see GIT_HANDOFF.md for the verified publication register as other issues/branches are created. Earlier 403/Unknown-tool failures are historical. The combined initial source import uses isolated local branch `feat/lms-platform-admissions`; attendance and learning use their respective stacked feature branches.
 
 ## Foundation: role workspaces, protected API and atomic subject selection
