@@ -8,6 +8,8 @@ API documentation now covers all 55 implemented HTTP operations. Import [public/
 
 | Document | Purpose |
 | --- | --- |
+| [REMAINING_WORK.md](REMAINING_WORK.md) | Current delivery gaps, policy dependencies and next modules. |
+| [PROJECTS.md](PROJECTS.md) | Project-board scope, permissions, setup and remaining team/room work. |
 | [API_GUIDE.md](API_GUIDE.md) | Beginner API explanation, Apidog import and contract maintenance. |
 | [LMS_PLAN.md](LMS_PLAN.md) | Program requirements, architecture and delivery plan. |
 | [UX_BLUEPRINT.md](UX_BLUEPRINT.md) | User workspaces, journeys and scenario coverage. |
