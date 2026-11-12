@@ -2,7 +2,7 @@
 
 Read README.md and IMPLEMENTATION.md first. Use LMS_PLAN.md, PROGRAM_RULES.md and UX_BLUEPRINT.md for product scope; SECURITY.md and SECURITY_TEST_PLAN.md define controls and acceptance evidence. DISCOVERY_QUESTIONS.md distinguishes unresolved policy from owner decisions. Do not silently choose policy outside the attendance design the owner explicitly delegated.
 
-The entire LMS is not finished. Default screens use synthetic data. Local npm access is blocked; use the available GitHub connector/CI and inspect actual workflow results. Latest quiz-feature CI passes type checking, 27 domain + 52 API/PGlite + 24 preview-browser tests and production build. Live provider/device/concurrency/security verification remains incomplete; report exact checks and limitations, and never mark a control complete from source presence alone.
+The entire LMS is not finished. Default screens use synthetic data. Local npm access is blocked; use the available GitHub connector/CI and inspect actual workflow results. Project PR #22 is merged into dev at 52b5f90e1f49d20ee248330da1823ed27117ec92; post-merge run 43172849901 passes type checking, API checks, 36 domain + 75 API/PGlite + 32 preview-browser tests and production build. Live provider/device/concurrency/security verification remains incomplete; report exact checks and limitations, and never mark a control complete from source presence alone.
 
 ## Development
 

@@ -1,6 +1,6 @@
 # Remaining LMS work
 
-Updated 2026-11-06. This is a delivery map, not a production completion claim. Automated results and actual merge status belong in IMPLEMENTATION.md, GIT_HANDOFF.md and the linked GitHub issues/PRs.
+Updated 2026-11-12. Project boards, sprints and explicit assigned access are merged into dev through PR #22; exact-head and post-merge CI pass 143 tests, API checks, type checking and build. This is a delivery map, not a production completion claim. Detailed evidence belongs in IMPLEMENTATION.md, GIT_HANDOFF.md and the linked GitHub issues/PRs.
 
 | Area | Existing implementation | Still needed |
 | --- | --- | --- |
@@ -11,7 +11,7 @@ Updated 2026-11-06. This is a delivery map, not a production completion claim. A
 | Attendance | Dated sessions, rotating code/QR, leave/correction/finalization, quarter-unit totals | Real camera/device/provider pilot, operational disputes/notifications and certificate evaluation integration |
 | Learning | Text/link lessons, individual assignments, immutable work and released grades | Files/group work, content revision/withdrawal, appeals/rubrics and recovery requirements selected by the program |
 | Quizzes | Exam and live-game choice quizzes, server grading/deadlines, advisory monitoring | Real device/network/load testing, accommodations and broader formats if selected; browser events never prove cheating |
-| Projects | Initial board/sprint/assigned-access source in issue #21 | Self-service team formation, department composition rules, finalization, rooms, attachments/notifications and live acceptance |
+| Projects | Initial private boards, sprints, task history/comments and explicit assigned access merged in PR #22 | Self-service team formation, department composition rules, finalization, rooms, attachments/notifications and live acceptance |
 | Rooms | Requirements recorded | Annual inventory, shared assignments, configurable booking windows/quotas, overlap protection, cancellation/no-show/override policy and accessible booking UI |
 | Jury and showcase | Confirmed two rounds, distinct panels, no own-team judging | Official rubric/aggregation/ties/odd-count rules, named guest invitations, conflict checks, scoring, finalist decisions and reviewed publication |
 | Audience and awards | Confirmed six distinct winners; tested audience exclusion helper | Cyber-team identity/network integration, atomic ballots, verified voter recovery, jury-decided award recording, ties/approval and result release |
@@ -20,7 +20,7 @@ Updated 2026-11-06. This is a delivery map, not a production completion claim. A
 
 ## Delivery order
 
-Finish and verify the project-board increment, then facilities/annual administration and team formation. Competition and certificates can be built once their required decisions/configuration are available. Keep incomplete actions closed. Do not invent rubric weights, award priority, audience identity, retention periods or final certificate eligibility to make a screen look complete.
+Continue with facilities/annual administration and team formation after their required decisions are available. Competition and certificates also need their required policy/configuration. Project development integration is complete for its initial scope; live acceptance is still pending. Keep incomplete actions closed. Do not invent rubric weights, award priority, audience identity, retention periods or final certificate eligibility to make a screen look complete.
 
 Current questions ask the owner about project permissions and the intended private-room quota. No answer is assumed. The official jury rubric remains with the organizer and the cyber integration remains unconfirmed; do not repeatedly request credentials or collect private participant data in chat.
 

@@ -1,6 +1,8 @@
 # Security Acceptance Scenarios
 
-Updated: 2026-11-05. Companion to [SECURITY.md](SECURITY.md) and the [README operational runbook](README.md).
+Updated: 2026-11-12. Companion to [SECURITY.md](SECURITY.md) and the [README operational runbook](README.md).
+
+Latest scoped automated evidence: project PR #22 and post-merge run 43172849901 pass 36 domain, 75 API/PGlite and 32 synthetic browser tests, including project assignment scope, MFA, NULL/stale revisions, direct-RPC grants and revocation/archive cases. This does not complete any full scenario below. Actual Supabase/PostgREST/Auth/MFA, separate-connection races, real devices, load and operational recovery remain NOT RUN. Earlier quiz evidence below is historical.
 
 **Execution status: NOT RUN for every full scenario below.** Initial application and test sources now exist; see [IMPLEMENTATION.md](IMPLEMENTATION.md). The quiz feature increment passes 27 domain/validation/challenge tests, 52 API/PGlite tests and 24 synthetic Chromium browser tests (run 41994150546). These provide scoped supporting evidence, but do not complete these end-to-end security scenarios. No database deployment or full security test run has occurred. Passing regressions include named default function grants, grading draft privacy, attendance expiry checks and private leave-read visibility. Actual lock-wait concurrency and real Supabase/MFA/device tests remain separate requirements; see IMPLEMENTATION.md for the CI run.
 

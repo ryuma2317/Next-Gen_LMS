@@ -1,6 +1,12 @@
 # Implementation and next steps
 
-## Project boards increment (2026-11-06)
+## Current integration (2026-11-12)
+
+Project [PR #22](https://github.com/ryuma2317/Next-Gen_LMS/pull/22) is merged into dev at 52b5f90e1f49d20ee248330da1823ed27117ec92. Final source head 5d24dad7c23a1458dc2cefd03dfdc7a240f36402 passed [push CI](https://github.com/ryuma2317/Next-Gen_LMS/actions/runs/43171758874) and [PR CI](https://github.com/ryuma2317/Next-Gen_LMS/actions/runs/43171767115); [post-merge CI](https://github.com/ryuma2317/Next-Gen_LMS/actions/runs/43172849901) also passes. Each verifies 36 native + 75 API/PGlite + 32 synthetic desktop/mobile Chromium tests (143 total), API freshness/coverage, TypeScript and client/Worker build. Source review covered scoped access, named-role ACLs, revisions, locks, archive and revocation. No external human review was submitted.
+
+The writable dev checkout and root source snapshot match the merged project tree. Local native tests (36), OpenAPI freshness and diff checks pass; local npm installation remains blocked. Apply the complete migration set through 014 only through the approved isolated pilot/release process. No provider configuration, real grants, deployment, subscription or main merge occurred. Live provider/device/concurrency/recovery/load/security acceptance remains NOT RUN. REMAINING_WORK.md is the delivery map; the dated increment notes below preserve historical evidence, including statements that a merge was pending at that time.
+
+## Project boards increment (2026-11-06, historical pre-merge snapshot)
 
 Issue [#21](https://github.com/ryuma2317/Next-Gen_LMS/issues/21), feat/21-project-boards from dev d9a318dabd51518abc377cca777c76e806592ecc (PR #20 merged; post-merge run 42163736922 passed 116 tests, type checking and build). New sources add separate project assignments, explicit capabilities/capacities, private kanban work, comments/history and sprint planning. See PROJECTS.md and REMAINING_WORK.md. Apply all migrations through 202611060014_project_configuration_validation.sql when preparing an isolated pilot; no migration/deployment occurred here.
 
