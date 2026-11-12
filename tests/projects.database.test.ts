@@ -38,6 +38,9 @@ it('creates configured projects with identical UUID retries and keeps unassigned
  expect((await asUser(member,'select public.project_list($1) result',[edition])).rows[0].result.projects).toEqual([])
  await expect(asUser(outsider,'select public.project_board($1)',[project])).rejects.toThrow()
  await expect(asUser(crossEdition,'select public.project_board($1)',[project])).rejects.toThrow()
+ await expect(asUser(manager,'select public.project_board($1)',[project],'aal1')).rejects.toThrow()
+ const noMfa=(await asUser(manager,'select public.project_list($1) result',[edition],'aal1')).rows[0].result
+ expect(noMfa.can_manage).toBe(false);expect(noMfa.projects).toEqual([])
  await expect(asUser(manager,'select public.save_project($1,$2,null,$3)',[project,edition,JSON.stringify(fields())])).rejects.toThrow()
  await expect(asUser(manager,'select public.save_project($1,$2,0,$3)',[id(70),edition,JSON.stringify({...fields(),columns:[fields().columns[0],fields().columns[0]]})])).rejects.toThrow('Duplicate columns')
  schema('ProjectList',(await asUser(manager,'select public.project_list($1) result',[edition])).rows[0].result)

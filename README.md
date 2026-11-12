@@ -2,7 +2,7 @@
 
 Development workspace for the yearly CADT Next-Gen Engagement program. Build 0.4 includes initial selection, admissions, attendance, lesson, assignment/submission, grading and initial exam/live-game quiz sources. Live configuration and verification remain pending; it is not ready for real participants.
 
-API documentation now covers all 55 implemented HTTP operations. Import [public/openapi.json](public/openapi.json) into Apidog and follow [API_GUIDE.md](API_GUIDE.md). Documentation-source CI run 42162605308 passes 116 automated tests, type checking and build; actual Apidog workspace import and live provider/security acceptance remain unverified. Earlier evidence sections below are historical.
+API documentation covers 69 implemented HTTP operations, including the initial project-board increment. Import [public/openapi.json](public/openapi.json) into Apidog and follow [API_GUIDE.md](API_GUIDE.md). PR #20 merged the documentation baseline with 116 passing tests; project verification is recorded in IMPLEMENTATION.md. Actual Apidog workspace import and live provider/security acceptance remain unverified. Earlier evidence sections below are historical.
 
 ## Start here
 
@@ -35,7 +35,7 @@ Local package installation remains blocked, but GitHub Actions generated the rev
 
 Account settings include initial authenticator enrollment and verification sources; provider testing is pending. Initial learning sources now include lesson drafts, configured individual text/link assignments, immutable submissions and separately released grading. Initial exam/live-game quiz sources pass automated CI: 103 domain/API/PGlite/Chromium tests plus type checking and build. Actual provider/device/load/security acceptance remains pending; see QUIZZES.md. Broader quiz formats, file/group submissions, complete disputes/certificates, projects/rooms, jury/voting and administration workflows remain unfinished.
 
-**Current setup requires every migration through `202611050012_quiz_report_scope.sql`.** The latest Worker and migrations 004/005/006 must be deployed together in the reviewed development/release process. Migration 004 replaces the attendance recording interface; 005 explicitly restricts named-role function grants. Quiz sources require the full set through 012 with the matching client/API, including timed reveals and private-report permission fixes. Earlier increment setup notes are historical and do not establish readiness to expose live intake or check-in.
+**Current sources require every migration through 202611060014_project_configuration_validation.sql.** Apply the complete set with the matching client/API through the reviewed development/release process. Migration 004 replaces attendance recording; 005 restricts named-role function grants; 010/011/012 fix quiz list shape, timed reveals and private report scope. Projects need 013 plus the forward validator fix 014. Earlier setup notes are historical and do not establish readiness to expose live features.
 
 ## Current direction
 

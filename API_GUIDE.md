@@ -64,7 +64,7 @@ The contract covers account memberships, editions/classes, seat claims, recruitm
 
 Exam/game grading runs in database paths. Learner questions exclude keys; teacher-only definitions include them. Fullscreen/visibility signals are client-controlled advisory events, not proof of cheating or device lockdown. They trigger no automatic penalty. See QUIZZES.md.
 
-Projects, rooms, guest jury, voting, awards, certificates and complete administration remain unfinished. Planned endpoints are not presented as working operations. This file covers LMS HTTP, not every provider SDK endpoint, direct RPC or scheduled invitation job.
+Initial project-board operations now cover explicit assignments, tasks, comments/history and sprints; see PROJECTS.md for their boundaries. Self-service team formation, rooms, guest jury, voting, awards, certificates and complete administration remain unfinished. Planned endpoints are not presented as working operations. This file covers LMS HTTP, not every provider SDK endpoint, direct RPC or scheduled invitation job.
 
 ## Maintain the contract
 

@@ -16,7 +16,7 @@ The UI uses column selectors that work with keyboard and touch. It retains task 
 
 ## Database/API boundaries
 
-Apply every migration through **202611060013_projects.sql** in the approved isolated environment. It adds RLS-protected project tables with no browser/service direct table grants and narrowly exposed caller-checked RPCs. It explicitly revokes PUBLIC, anon, authenticated and service_role function grants before restoring intended authenticated RPC access.
+Apply every migration through **202611060014_project_configuration_validation.sql** in the approved isolated environment. Migration 013 adds RLS-protected project tables with no browser/service direct table grants and narrowly exposed caller-checked RPCs. It explicitly revokes PUBLIC, anon, authenticated and service_role function grants before restoring intended authenticated RPC access. Forward migration 014 corrects a JSON alias ambiguity discovered in CI; do not stop at 013.
 
 Mutations lock the project before task/sprint/member changes, serializing capacity, membership revocation, archive, column configuration and work updates. Version checks reject NULL/stale inputs. UUID create retries require the same initial stored fields; comments also match task/author/body. Actors are derived from Auth. Foreign project/edition assignments are denied.
 

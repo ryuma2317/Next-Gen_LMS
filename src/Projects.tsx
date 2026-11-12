@@ -22,15 +22,16 @@ export function Projects({session,edition,role}:{session:Session|null;edition:st
  useEffect(()=>{
   let cancelled=false
   if(!session||!edition)return
-  setBusy(true)
+  setBusy(true);setCanManage(false)
   void api<{can_manage:boolean;projects:ProjectSummary[]}>('/editions/'+edition+'/projects',session.access_token).then(result=>{
    if(cancelled)return
-   setList(result.projects);setCanManage(result.can_manage);setProject(previous=>result.projects.some(p=>p.id===previous)?previous:result.projects[0]?.id??'')
+   setList(result.projects);setCanManage(result.can_manage);if(!result.can_manage)setEditingProject(null);setProject(previous=>result.projects.some(p=>p.id===previous)?previous:result.projects[0]?.id??'')
   }).catch(e=>{if(!cancelled)setMessage(e.message)}).finally(()=>{if(!cancelled)setBusy(false)})
   return()=>{cancelled=true}
  },[session?.access_token,edition])
  useEffect(()=>{
-  if(!session||!project)return
+  if(!session)return
+  if(!project){setBoard(null);setTasks([]);setSelected('');setThread(null);pendingComment.current=null;return}
   const generation=++epoch.current;setBusy(true)
   if(loadedProject.current!==project){loadedProject.current=project;setBoard(null);setTasks([]);setSelected('');setThread(null);setComment('');setCandidates([]);setCandidateOffset(0)}
   void Promise.all([api<ProjectBoard>('/projects/'+project,session.access_token),api<ProjectTask[]>('/projects/'+project+'/tasks?offset='+offset,session.access_token)]).then(([next,rows])=>{
