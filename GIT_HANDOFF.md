@@ -1,5 +1,11 @@
 # Git handover result
 
+## Current continuation: project boards
+
+Feature [#21](https://github.com/ryuma2317/Next-Gen_LMS/issues/21), [PR #22](https://github.com/ryuma2317/Next-Gen_LMS/pull/22), feat/21-project-boards, prepared in tmp/projects-handoff from dev d9a318dabd51518abc377cca777c76e806592ecc. API contract PR #20 was merged at that baseline; post-merge run 42163736922 passes 116 tests. Earlier pending-merge snapshots below are historical.
+
+Published initial project source f8b5918c7346da287c1807b266a843ef91e65358 has tree 93baefc0cbd824fc49f7144b3a3454bc7081d4f4, verified identical to local c71991a8cf24899f5702fe25004ad7a798776526. Original local history is preserved under archive/local-projects-first. CI found the private validator ambiguity (#23); forward migration 014 is published at 435a42a50c3d97d7899ccbd22938325595342731 with tree 5d8c662a348580300309966b5795fb523cc1f367. [Run 42186529606](https://github.com/ryuma2317/Next-Gen_LMS/actions/runs/42186529606) passes 143 automated tests, type checking and client/Worker build. Final review/doc edits still require exact-head CI before the authorized dev merge. The PR/issue record the actual latest merge/check status. Main is unchanged; no deployment or real project assignment occurred.
+
 ## Current continuation: API contract
 
 2026-11-06: the quiz PR #17 was merged into dev at 7d3d4fa03e65fc3d6695db7297f5eecdab88982a; post-merge run 42056706944 passed. Main remains unchanged.

@@ -1,5 +1,13 @@
 # Implementation and next steps
 
+## Project boards increment (2026-11-06)
+
+Issue [#21](https://github.com/ryuma2317/Next-Gen_LMS/issues/21), feat/21-project-boards from dev d9a318dabd51518abc377cca777c76e806592ecc (PR #20 merged; post-merge run 42163736922 passed 116 tests, type checking and build). New sources add separate project assignments, explicit capabilities/capacities, private kanban work, comments/history and sprint planning. See PROJECTS.md and REMAINING_WORK.md. Apply all migrations through 202611060014_project_configuration_validation.sql when preparing an isolated pilot; no migration/deployment occurred here.
+
+Evidence: 36 native tests PASS locally, including contract discovery for 69 HTTP operations. [CI run 42186529606](https://github.com/ryuma2317/Next-Gen_LMS/actions/runs/42186529606) on 435a42a50c3d97d7899ccbd22938325595342731 passes npm ci, artifact freshness, type checking, 36 native + 75 API/PGlite + 32 desktop/mobile Chromium tests (143 total), and client/Worker build. The first run found the project-validator SQL alias ambiguity, tracked in #23; forward migration 014 fixes it without rewriting 013. Review also clears cached project UI when assignments disappear and keeps explicit management controls closed while reloading. These final review/doc changes require exact-head CI before merging [PR #22](https://github.com/ryuma2317/Next-Gen_LMS/pull/22).
+
+TypeScript permits .ts imports under noEmit so native Node tests can run shared project validators directly. All seven new project tables have RLS and no direct browser/service grants; authenticated RPCs derive actor/scope. Tests cover NULL/stale revisions, private reads, MFA, capacity, identical retries, assignments, plain-text comments/history, sprint closure and revocation/archive. This is narrow automated evidence. Live Supabase/PostgREST/Auth/MFA, actual separate-connection contention, devices/camera/network recovery, load and full security acceptance remain NOT RUN. Project-role policy, self-formation, department composition and finalization remain unresolved and are not silently enabled.
+
 ## API documentation increment (2026-11-06)
 
 Issue [#19](https://github.com/ryuma2317/Next-Gen_LMS/issues/19), branch docs/api-contract from dev 7d3d4fa03e65fc3d6695db7297f5eecdab88982a. The quiz increment was merged through PR #17 and post-merge run 42056706944 passed its 103 automated tests, type checking and build. The older baseline/evidence sections below are historical.

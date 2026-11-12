@@ -13,6 +13,7 @@ The entire LMS is not finished. Default screens use synthetic data. Local npm ac
 - Keep real applicants, private PDFs, extracted reference content, secrets and exports out of Git and public issue/PR evidence.
 - Add forward migrations; do not rewrite deployed migration history. Run relevant checks and record PASS/FAIL/BLOCKED/NOT RUN truthfully.
 - Keep the HTTP contract in api/operations.mjs and api/schemas.mjs synchronized with route/DTO changes. Regenerate public/openapi.json with npm run docs:api; check:api and native route/security coverage must pass. API_GUIDE.md explains Apidog import and verification limits. Never include live tokens/private receipt proofs in examples or exported API environments.
+- Project-board sources require all migrations through 014 and explicit project permissions; section teaching membership is not project membership. Migration 014 fixes the configuration validator found by CI; never stop at 013. Do not turn the synthetic preview's role examples into automatic live grants. See PROJECTS.md and REMAINING_WORK.md.
 
 ## GitHub workflow requested by owner
 
