@@ -1,6 +1,8 @@
 # Next-Gen Engagement Platform
 
-Development workspace for the yearly CADT Next-Gen Engagement program. Build 0.4 includes initial selection, admissions, attendance, lesson, assignment/submission, grading and initial exam/live-game quiz sources. Live configuration and verification remain pending; it is not ready for real participants.
+Development workspace for the yearly CADT Next-Gen Engagement program. Implemented development features include initial selection, admissions, attendance, lessons, assignments/submissions, grading, exam/live-game quizzes and private project boards with sprints and assigned mentor/advisor access. Live configuration and verification remain pending; it is not ready for real participants.
+
+Latest integration (2026-11-12): [PR #22](https://github.com/ryuma2317/Next-Gen_LMS/pull/22) merged project boards into dev at 52b5f90e1f49d20ee248330da1823ed27117ec92. [Post-merge CI](https://github.com/ryuma2317/Next-Gen_LMS/actions/runs/43172849901) passes 36 domain, 75 API/PGlite and 32 desktop/mobile Chromium tests (143 total), API-contract checks, type checking and client/Worker production build. Main is unchanged; no live deployment occurred. The default UI uses synthetic data. Read REMAINING_WORK.md for delivery gaps; older evidence below is historical.
 
 API documentation covers 69 implemented HTTP operations, including the initial project-board increment. Import [public/openapi.json](public/openapi.json) into Apidog and follow [API_GUIDE.md](API_GUIDE.md). PR #20 merged the documentation baseline with 116 passing tests; project verification is recorded in IMPLEMENTATION.md. Actual Apidog workspace import and live provider/security acceptance remain unverified. Earlier evidence sections below are historical.
 

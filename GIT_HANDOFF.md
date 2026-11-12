@@ -1,6 +1,14 @@
 # Git handover result
 
-## Current continuation: project boards
+## Latest verified integration (2026-11-12)
+
+Project [PR #22](https://github.com/ryuma2317/Next-Gen_LMS/pull/22) merged into dev at 52b5f90e1f49d20ee248330da1823ed27117ec92. Final feature source 5d24dad7c23a1458dc2cefd03dfdc7a240f36402 and merge share tree 449d7582947d7da906f0c0bd06f67508cff4c558. Exact-head push/PR runs 43171758874 and 43171767115 passed; [post-merge run 43172849901](https://github.com/ryuma2317/Next-Gen_LMS/actions/runs/43172849901) passes 143 tests, API checks, type checking and client/Worker build.
+
+Verified GitHub commit metadata was imported without rewriting source trees. Original local feature/fix/review history is preserved under archive/local-projects-first, archive/local-projects-fix and archive/local-projects-review in tmp/projects-handoff; its feature branch matches the remote final head. tmp/dev-handoff was fast-forwarded to the merge, and every tracked root source was compared with that merged tree. The root .git was untouched. Main remains 1315aa449acd2174c0e1be8d264f261cd36bc3b2. No deployment, live migration or real participant grant occurred.
+
+Documentation follow-up [#24](https://github.com/ryuma2317/Next-Gen_LMS/issues/24) uses docs/24-delivery-handover from that dev baseline. Its PR records the later documentation commit/check/merge status. Older pending-merge snapshots below are historical; live acceptance and remaining program modules are still incomplete.
+
+## Historical continuation: project boards
 
 Feature [#21](https://github.com/ryuma2317/Next-Gen_LMS/issues/21), [PR #22](https://github.com/ryuma2317/Next-Gen_LMS/pull/22), feat/21-project-boards, prepared in tmp/projects-handoff from dev d9a318dabd51518abc377cca777c76e806592ecc. API contract PR #20 was merged at that baseline; post-merge run 42163736922 passes 116 tests. Earlier pending-merge snapshots below are historical.
 
