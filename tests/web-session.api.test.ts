@@ -53,7 +53,8 @@ it('login issues only a hardened random opaque cookie, metadata and encrypted se
  expect(response.headers.get('Cache-Control')).toBe('no-store')
 })
 it('rejects cross-origin, missing Origin, cross-site metadata, form encoding and provider-token injection before sign-in',async()=>{
- for(const headers of [{Origin:'https://evil.example.test'},{Origin:''},{'Sec-Fetch-Site':'cross-site'},{'X-LMS-Request':''},{'Content-Type':'application/x-www-form-urlencoded'}])expect((await request('/auth/login',{email:'a@example.test',password:'pass'},headers)).status).toBeGreaterThanOrEqual(400)
+ const deniedHeaders:Record<string,string>[]=[{Origin:'https://evil.example.test'},{Origin:''},{'Sec-Fetch-Site':'cross-site'},{'X-LMS-Request':''},{'Content-Type':'application/x-www-form-urlencoded'}]
+ for(const headers of deniedHeaders)expect((await request('/auth/login',{email:'a@example.test',password:'pass'},headers)).status).toBeGreaterThanOrEqual(400)
  expect((await request('/auth/login',{email:'a@example.test',password:'pass',access_token:'injected'})).status).toBe(400)
  expect(mocked.signIn).not.toHaveBeenCalled()
 })
@@ -65,7 +66,8 @@ it('uses generic login errors and applies limiter without returning provider det
 })
 it('uses caller-context API authorization and blocks cookie writes without bound CSRF before business RPCs',async()=>{
  const {cookie,csrf}=await login()
- for(const headers of [{Cookie:cookie},{Cookie:cookie,'X-LMS-CSRF':'wrong'},{...cookieHeaders(cookie,csrf),Origin:'https://evil.example.test'}])expect((await request('/enrollments',{sectionId:id},headers)).status).toBe(403)
+ const deniedHeaders:Record<string,string>[]=[{Cookie:cookie},{Cookie:cookie,'X-LMS-CSRF':'wrong'},{...cookieHeaders(cookie,csrf),Origin:'https://evil.example.test'}]
+ for(const headers of deniedHeaders)expect((await request('/enrollments',{sectionId:id},headers)).status).toBe(403)
  expect(mocked.rpc.mock.calls.filter(([name])=>name==='claim_section')).toHaveLength(0)
  const allowed=await request('/enrollments',{sectionId:id},cookieHeaders(cookie,csrf));expect(allowed.status).toBe(201)
  const client=mocked.clients.mock.calls.find(([,key,options])=>key===env.SUPABASE_PUBLISHABLE_KEY&&(options as any)?.global?.headers?.Authorization)
