@@ -36,9 +36,10 @@ test('references resolve; operation IDs, path parameters and responses are well 
   }
  }
 })
-test('only the four intended public operations opt out of Bearer authentication',()=>{
- assert.deepEqual(doc.security,[{BearerAuth:[]}])
- assert.deepEqual(entries.filter(op=>op.security?.length===0).map(op=>op.operationId).sort(),['applicationReceipt','health','publishedRecruitmentForm','submitApplication'])
+test('only intended public operations opt out and account mutations require cookie sessions',()=>{
+ assert.deepEqual(doc.security,[{BrowserCookie:[]},{BearerAuth:[]}])
+ assert.deepEqual(entries.filter(op=>op.security?.length===0).map(op=>op.operationId).sort(),['applicationReceipt','browserLogin','browserSession','health','publishedRecruitmentForm','redeemBrowserInvitation','submitApplication'])
+ for(const id of ['browserFactors','browserAccountPassword','browserAccountEnroll','browserAccountVerify','browserLogout'])assert.deepEqual(entries.find(op=>op.operationId===id).security,[{BrowserCookie:[]}])
  for (const op of entries.filter(op=>!op.security)) assert(op.responses['401'],op.operationId)
  assert.equal(doc.components.securitySchemes.BearerAuth.scheme,'bearer')
  for (const name of ['quizDefinition','quizReport','saveQuiz','draftGrade','reviewApplication'])

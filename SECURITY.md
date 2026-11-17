@@ -1,9 +1,11 @@
 # Security Requirements and Implementation Register
 
-Updated: 2026-11-05
+Updated: 2026-11-12
 Applies to: React/Vite + Hono/Cloudflare Workers + Supabase PostgreSQL/Auth/private Storage.
 
 ## Status and scope
+
+Browser-auth sources replace JavaScript-readable provider sessions with server-held encrypted credentials and opaque HttpOnly cookies. SESSION_SECURITY.md and issue #26 cover CSRF/origin checks, service-only vault/leases, publication defenses and verification limits. Older dependency/session notes below are historical. Automated evidence does not complete the live control register.
 
 The workspace now includes initial application/API/migration sources; see [IMPLEMENTATION.md](IMPLEMENTATION.md). **The control register below is NOT VERIFIED.** Initial authentication, RLS, transaction and header sources cover part of the foundation, but dependencies/build/integration tests could not run because registry access was blocked. Do not treat the presence of code as completion. `.gitignore` reduces accidental commits of local secrets, generated output and private reference data; it neither scans secrets nor removes anything already tracked.
 

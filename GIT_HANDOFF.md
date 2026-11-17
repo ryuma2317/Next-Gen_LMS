@@ -1,5 +1,9 @@
 # Git handover result
 
+## Server-session security continuation
+
+Issue [#26](https://github.com/ryuma2317/Next-Gen_LMS/issues/26), fix/26-server-sessions, starts from verified dev b0ef7e7295b4eaac4e486e072f1a1fcbee4f46be after PR #25. Work is isolated in tmp/security-handoff; no root metadata is changed. Sources add server-held encrypted browser sessions, CSRF/lease boundaries, explicit configuration and publication/build checks. Native checks pass (39); full exact-head CI and merge are pending at this source snapshot. The issue/PR records actual subsequent commits/checks/merge status. No live secret, participant data, deployment, subscription or main merge is included. Apply the complete migration set through 015 only through approved isolated verification/release.
+
 ## Latest verified integration (2026-11-12)
 
 Project [PR #22](https://github.com/ryuma2317/Next-Gen_LMS/pull/22) merged into dev at 52b5f90e1f49d20ee248330da1823ed27117ec92. Final feature source 5d24dad7c23a1458dc2cefd03dfdc7a240f36402 and merge share tree 449d7582947d7da906f0c0bd06f67508cff4c558. Exact-head push/PR runs 43171758874 and 43171767115 passed; [post-merge run 43172849901](https://github.com/ryuma2317/Next-Gen_LMS/actions/runs/43172849901) passes 143 tests, API checks, type checking and client/Worker build.

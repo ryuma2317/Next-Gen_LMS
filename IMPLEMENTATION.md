@@ -1,5 +1,11 @@
 # Implementation and next steps
 
+## Server-held browser sessions (issue #26, 2026-11-12)
+
+The owner requested server-side token handling. Sources on fix/26-server-sessions from dev b0ef7e7295b4eaac4e486e072f1a1fcbee4f46be replace the browser Supabase client with same-origin auth endpoints, sanitized metadata and a random Secure/HttpOnly host cookie. Migration 015 stores hashed handles and encrypted provider credentials behind service-only RPCs, explicit lifetimes and versioned refresh/MFA leases. Origin/JSON/custom-header/session-bound CSRF checks protect cookie writes. Login, explicit invitation redemption, logout, password and TOTP operations are server-side; caller-context RLS and separate API-client Bearer access remain intact.
+
+Vite custom environment injection is disabled. Tracked-file/client-artifact publication guards reject bounded credential patterns and sensitive paths without printing values; CI builds with synthetic private/VITE sentinels. SESSION_SECURITY.md documents exposed values, configuration, key/expiry/recovery and limits. The API contract covers 77 operations. Local native/crypto/contract/publication-fixture tests: 39 PASS; artifact freshness PASS. Full dependency/type/API/PGlite/browser/build CI remains pending at this source snapshot; issue/PR evidence records later exact-head checks and merge status. Real Supabase/Auth/mail/MFA, HTTPS cookie/device/CSP, separate-connection refresh/revocation, load and complete security/operational acceptance are NOT RUN. No deployment, purchase, real credentials or main change.
+
 ## Current integration (2026-11-12)
 
 Project [PR #22](https://github.com/ryuma2317/Next-Gen_LMS/pull/22) is merged into dev at 52b5f90e1f49d20ee248330da1823ed27117ec92. Final source head 5d24dad7c23a1458dc2cefd03dfdc7a240f36402 passed [push CI](https://github.com/ryuma2317/Next-Gen_LMS/actions/runs/43171758874) and [PR CI](https://github.com/ryuma2317/Next-Gen_LMS/actions/runs/43171767115); [post-merge CI](https://github.com/ryuma2317/Next-Gen_LMS/actions/runs/43172849901) also passes. Each verifies 36 native + 75 API/PGlite + 32 synthetic desktop/mobile Chromium tests (143 total), API freshness/coverage, TypeScript and client/Worker build. Source review covered scoped access, named-role ACLs, revisions, locks, archive and revocation. No external human review was submitted.

@@ -13,6 +13,9 @@
   ],
   "tags": [
     {
+      "name": "Server-held browser sessions"
+    },
+    {
       "name": "Account and enrollment"
     },
     {
@@ -33,10 +36,1627 @@
   ],
   "security": [
     {
+      "BrowserCookie": []
+    },
+    {
       "BearerAuth": []
     }
   ],
   "paths": {
+    "/api/auth/session": {
+      "get": {
+        "operationId": "browserSession",
+        "summary": "Read safe browser session metadata",
+        "tags": [
+          "Server-held browser sessions"
+        ],
+        "description": "Returns only configured state, user ID and CSRF value. Unknown/expired sessions are signed out. HttpOnly cookie credentials are never returned.",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrowserSessionState"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds the global 32768-byte body limit.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected failure; private error details are withheld.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required provider/configuration is unavailable or a database read failed.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "x-handler-route": "/api/auth/session",
+        "x-requires-mfa": false,
+        "x-access-scope": "Returns only configured state, user ID and CSRF value. Unknown/expired sessions are signed out. HttpOnly cookie credentials are never returned."
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "operationId": "browserLogin",
+        "summary": "Sign in through the server",
+        "tags": [
+          "Server-held browser sessions"
+        ],
+        "description": "Exact configured HTTPS origin, JSON and X-LMS-Request: 1 required. Browser mutations also require the session-bound X-LMS-CSRF value. Provider tokens stay server-side; the cookie contains only a random handle. Login creates a new server-held session after provider verification; no CSRF value is required before login.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrowserLogin"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrowserSessionState"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input, invalid identifier, unsupported fields or page.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds the global 32768-byte body limit.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Send Content-Type: application/json.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Coarse abuse limiter rejected this request; wait before retrying.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              },
+              "Retry-After": {
+                "description": "Current cooldown in seconds.",
+                "schema": {
+                  "type": "string",
+                  "const": "60"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected failure; private error details are withheld.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required provider/configuration is unavailable or a database read failed.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "x-handler-route": "/api/auth/login",
+        "x-requires-mfa": false,
+        "x-access-scope": "Exact configured HTTPS origin, JSON and X-LMS-Request: 1 required. Browser mutations also require the session-bound X-LMS-CSRF value. Provider tokens stay server-side; the cookie contains only a random handle. Login creates a new server-held session after provider verification; no CSRF value is required before login."
+      }
+    },
+    "/api/auth/invite": {
+      "post": {
+        "operationId": "redeemBrowserInvitation",
+        "summary": "Explicitly accept an organizer invitation",
+        "tags": [
+          "Server-held browser sessions"
+        ],
+        "description": "Exact configured HTTPS origin, JSON and X-LMS-Request: 1 required. Browser mutations also require the session-bound X-LMS-CSRF value. Provider tokens stay server-side; the cookie contains only a random handle. Explicit redemption only; GET never consumes an invitation. No pre-login CSRF value is required.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RedeemInvitation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrowserSessionState"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input, invalid identifier, unsupported fields or page.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds the global 32768-byte body limit.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Send Content-Type: application/json.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Coarse abuse limiter rejected this request; wait before retrying.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              },
+              "Retry-After": {
+                "description": "Current cooldown in seconds.",
+                "schema": {
+                  "type": "string",
+                  "const": "60"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected failure; private error details are withheld.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required provider/configuration is unavailable or a database read failed.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "x-handler-route": "/api/auth/invite",
+        "x-requires-mfa": false,
+        "x-access-scope": "Exact configured HTTPS origin, JSON and X-LMS-Request: 1 required. Browser mutations also require the session-bound X-LMS-CSRF value. Provider tokens stay server-side; the cookie contains only a random handle. Explicit redemption only; GET never consumes an invitation. No pre-login CSRF value is required."
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "operationId": "browserLogout",
+        "summary": "Revoke my browser session",
+        "tags": [
+          "Server-held browser sessions"
+        ],
+        "description": "Exact configured HTTPS origin, JSON and X-LMS-Request: 1 required. Browser mutations also require the session-bound X-LMS-CSRF value. Provider tokens stay server-side; the cookie contains only a random handle. Revokes the LMS session before clearing the cookie. Idempotent if already signed out. Provider logout is best effort.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
+        "security": [
+          {
+            "BrowserCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Empty"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrowserLogout"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds the global 32768-byte body limit.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Send Content-Type: application/json.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected failure; private error details are withheld.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required provider/configuration is unavailable or a database read failed.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "x-handler-route": "/api/auth/logout",
+        "x-requires-mfa": false,
+        "x-access-scope": "Exact configured HTTPS origin, JSON and X-LMS-Request: 1 required. Browser mutations also require the session-bound X-LMS-CSRF value. Provider tokens stay server-side; the cookie contains only a random handle. Revokes the LMS session before clearing the cookie. Idempotent if already signed out. Provider logout is best effort."
+      }
+    },
+    "/api/auth/mfa": {
+      "get": {
+        "operationId": "browserFactors",
+        "summary": "Read my authenticator factor IDs and status",
+        "tags": [
+          "Server-held browser sessions"
+        ],
+        "description": "Verified browser session. Returns TOTP IDs/status only, never provider tokens or unrelated factor data.",
+        "security": [
+          {
+            "BrowserCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrowserFactors"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds the global 32768-byte body limit.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected failure; private error details are withheld.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required provider/configuration is unavailable or a database read failed.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "x-handler-route": "/api/auth/mfa",
+        "x-requires-mfa": false,
+        "x-access-scope": "Verified browser session. Returns TOTP IDs/status only, never provider tokens or unrelated factor data."
+      }
+    },
+    "/api/auth/account/password": {
+      "post": {
+        "operationId": "browserAccountPassword",
+        "summary": "Perform server-side account password",
+        "tags": [
+          "Server-held browser sessions"
+        ],
+        "description": "Exact configured HTTPS origin, JSON and X-LMS-Request: 1 required. Browser mutations also require the session-bound X-LMS-CSRF value. Provider tokens stay server-side; the cookie contains only a random handle. Requires the current user, rate limit and versioned session lease. Enrollment material is intentionally visible only for this setup; MFA never grants program permissions.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
+        "security": [
+          {
+            "BrowserCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrowserPassword"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrowserAccountSaved"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input, invalid identifier, unsupported fields or page.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource is unavailable. Private details are not disclosed.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds the global 32768-byte body limit.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Send Content-Type: application/json.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Coarse abuse limiter rejected this request; wait before retrying.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              },
+              "Retry-After": {
+                "description": "Current cooldown in seconds.",
+                "schema": {
+                  "type": "string",
+                  "const": "60"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected failure; private error details are withheld.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required provider/configuration is unavailable or a database read failed.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "x-handler-route": "/api/auth/account/:action",
+        "x-handler-variant": "password",
+        "x-requires-mfa": false,
+        "x-access-scope": "Exact configured HTTPS origin, JSON and X-LMS-Request: 1 required. Browser mutations also require the session-bound X-LMS-CSRF value. Provider tokens stay server-side; the cookie contains only a random handle. Requires the current user, rate limit and versioned session lease. Enrollment material is intentionally visible only for this setup; MFA never grants program permissions."
+      }
+    },
+    "/api/auth/account/enroll": {
+      "post": {
+        "operationId": "browserAccountEnroll",
+        "summary": "Perform server-side account enroll",
+        "tags": [
+          "Server-held browser sessions"
+        ],
+        "description": "Exact configured HTTPS origin, JSON and X-LMS-Request: 1 required. Browser mutations also require the session-bound X-LMS-CSRF value. Provider tokens stay server-side; the cookie contains only a random handle. Requires the current user, rate limit and versioned session lease. Enrollment material is intentionally visible only for this setup; MFA never grants program permissions.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
+        "security": [
+          {
+            "BrowserCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Empty"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrowserEnrollment"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input, invalid identifier, unsupported fields or page.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource is unavailable. Private details are not disclosed.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds the global 32768-byte body limit.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Send Content-Type: application/json.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Coarse abuse limiter rejected this request; wait before retrying.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              },
+              "Retry-After": {
+                "description": "Current cooldown in seconds.",
+                "schema": {
+                  "type": "string",
+                  "const": "60"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected failure; private error details are withheld.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required provider/configuration is unavailable or a database read failed.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "x-handler-route": "/api/auth/account/:action",
+        "x-handler-variant": "enroll",
+        "x-requires-mfa": false,
+        "x-access-scope": "Exact configured HTTPS origin, JSON and X-LMS-Request: 1 required. Browser mutations also require the session-bound X-LMS-CSRF value. Provider tokens stay server-side; the cookie contains only a random handle. Requires the current user, rate limit and versioned session lease. Enrollment material is intentionally visible only for this setup; MFA never grants program permissions."
+      }
+    },
+    "/api/auth/account/verify": {
+      "post": {
+        "operationId": "browserAccountVerify",
+        "summary": "Perform server-side account verify",
+        "tags": [
+          "Server-held browser sessions"
+        ],
+        "description": "Exact configured HTTPS origin, JSON and X-LMS-Request: 1 required. Browser mutations also require the session-bound X-LMS-CSRF value. Provider tokens stay server-side; the cookie contains only a random handle. Requires the current user, rate limit and versioned session lease. Enrollment material is intentionally visible only for this setup; MFA never grants program permissions.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
+        "security": [
+          {
+            "BrowserCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrowserVerify"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrowserAccountSaved"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input, invalid identifier, unsupported fields or page.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource is unavailable. Private details are not disclosed.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds the global 32768-byte body limit.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Send Content-Type: application/json.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Coarse abuse limiter rejected this request; wait before retrying.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              },
+              "Retry-After": {
+                "description": "Current cooldown in seconds.",
+                "schema": {
+                  "type": "string",
+                  "const": "60"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected failure; private error details are withheld.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required provider/configuration is unavailable or a database read failed.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "x-handler-route": "/api/auth/account/:action",
+        "x-handler-variant": "verify",
+        "x-requires-mfa": false,
+        "x-access-scope": "Exact configured HTTPS origin, JSON and X-LMS-Request: 1 required. Browser mutations also require the session-bound X-LMS-CSRF value. Provider tokens stay server-side; the cookie contains only a random handle. Requires the current user, rate limit and versioned session lease. Enrollment material is intentionally visible only for this setup; MFA never grants program permissions."
+      }
+    },
     "/api/health": {
       "get": {
         "operationId": "health",
@@ -143,7 +1763,45 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -256,7 +1914,45 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -399,7 +2095,45 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -542,7 +2276,45 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -630,7 +2402,7 @@
         "tags": [
           "Account and enrollment"
         ],
-        "description": "Active trainee; edition selection must be open. Core-department rules, annual limits and capacity are checked transactionally. Existing claims cannot overwrite another participant.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Active trainee; edition selection must be open. Core-department rules, annual limits and capacity are checked transactionally. Existing claims cannot overwrite another participant.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "requestBody": {
           "required": true,
           "content": {
@@ -681,7 +2453,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -929,7 +2720,7 @@
         "tags": [
           "Admissions"
         ],
-        "description": "Public. A published form and private receipt proof are required. Submission does not grant an account or program access.\n\nRate limit: 100 requests per 60 seconds per trusted connecting IP in the current Worker configuration; public POST receipt requests share this limiter.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Public. A published form and private receipt proof are required. Submission does not grant an account or program access.\n\nRate limit: 100 requests per 60 seconds per trusted connecting IP in the current Worker configuration; public POST receipt requests share this limiter.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "security": [],
         "requestBody": {
           "required": true,
@@ -1133,7 +2924,7 @@
         "tags": [
           "Admissions"
         ],
-        "description": "Public transport, private proof in the JSON body. Returns status/purpose/time only, not applicant answers.\n\nRate limit: Shares the public admissions POST IP limiter. Do not put the receipt token in a URL.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Public transport, private proof in the JSON body. Returns status/purpose/time only, not applicant answers.\n\nRate limit: Shares the public admissions POST IP limiter. Do not put the receipt token in a URL.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "security": [],
         "requestBody": {
           "required": true,
@@ -1373,7 +3164,45 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -1459,7 +3288,7 @@
         "tags": [
           "Admissions"
         ],
-        "description": "manage_recruitment for the edition plus MFA. Existing versions are preserved; a supplied close time must be future.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "manage_recruitment for the edition plus MFA. Existing versions are preserved; a supplied close time must be future.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -1521,7 +3350,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -1653,7 +3501,45 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -1741,7 +3627,7 @@
         "tags": [
           "Admissions"
         ],
-        "description": "Verified matching mailbox and passed outcome. Idempotent activation does not reactivate suspended memberships or overwrite affiliation.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Verified matching mailbox and passed outcome. Idempotent activation does not reactivate suspended memberships or overwrite affiliation.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -1793,7 +3679,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -1956,7 +3861,7 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -1976,6 +3881,25 @@
           },
           "403": {
             "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -2063,7 +3987,7 @@
         "tags": [
           "Admissions"
         ],
-        "description": "review_admissions plus MFA and current revision. Record interview/orientation evidence through the permitted state transitions.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "review_admissions plus MFA and current revision. Record interview/orientation evidence through the permitted state transitions.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -2125,7 +4049,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -2284,7 +4227,45 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -2427,7 +4408,45 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -2567,7 +4586,7 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -2693,7 +4712,7 @@
         "tags": [
           "Attendance"
         ],
-        "description": "Active expected trainee in this session. The server verifies the code and derives actor/expiry; the database checks receipt time after its lock.\n\nRate limit: 20 check-in attempts per 60 seconds per verified user in the current Worker configuration.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Active expected trainee in this session. The server verifies the code and derives actor/expiry; the database checks receipt time after its lock.\n\nRate limit: 20 check-in attempts per 60 seconds per verified user in the current Worker configuration.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -2755,7 +4774,7 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -2926,7 +4945,7 @@
         "tags": [
           "Attendance"
         ],
-        "description": "Assigned trainer. A published attendance policy, eligible roster and permitted start window are required.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Assigned trainer. A published attendance policy, eligible roster and permitted start window are required.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -2988,7 +5007,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -3115,7 +5153,7 @@
         "tags": [
           "Attendance"
         ],
-        "description": "Assigned trainer after delivery. Unresolved leave remains pending, not silently absent.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Assigned trainer after delivery. Unresolved leave remains pending, not silently absent.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -3177,7 +5215,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -3304,7 +5361,7 @@
         "tags": [
           "Attendance"
         ],
-        "description": "Eligible active trainee with a session obligation. The explanation remains private; repeated identical requests are safe.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Eligible active trainee with a session obligation. The explanation remains private; repeated identical requests are safe.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -3366,7 +5423,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -3493,7 +5569,7 @@
         "tags": [
           "Attendance"
         ],
-        "description": "manage_schedule plus MFA, current session revision and reason. Cancelled sessions create no attendance obligation.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "manage_schedule plus MFA, current session revision and reason. Cancelled sessions create no attendance obligation.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -3555,7 +5631,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -3682,7 +5777,7 @@
         "tags": [
           "Attendance"
         ],
-        "description": "Assigned trainer or review_attendance plus MFA for reviewer access. No self-correction. Use the participant record revision, not the session revision.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Assigned trainer or review_attendance plus MFA for reviewer access. No self-correction. Use the participant record revision, not the session revision.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -3744,7 +5839,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -3871,7 +5985,7 @@
         "tags": [
           "Attendance"
         ],
-        "description": "review_attendance plus MFA, current request revision and reason. No self-approval; trainers do not automatically receive private notes.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "review_attendance plus MFA, current request revision and reason. No self-approval; trainers do not automatically receive private notes.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -3933,7 +6047,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -4059,7 +6192,7 @@
         "tags": [
           "Attendance"
         ],
-        "description": "manage_schedule for the section edition plus MFA. Server checks valid duration and even positive absence weight.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "manage_schedule for the section edition plus MFA. Server checks valid duration and even positive absence weight.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -4121,7 +6254,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -4247,7 +6399,7 @@
         "tags": [
           "Attendance"
         ],
-        "description": "manage_schedule plus MFA. Warnings must increase below the failure threshold; policy freezes at the first session start.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "manage_schedule plus MFA. Warnings must increase below the failure threshold; policy freezes at the first session start.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -4309,7 +6461,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -4490,7 +6661,45 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -4630,7 +6839,45 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -4786,7 +7033,45 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -4874,7 +7159,7 @@
         "tags": [
           "Lessons and assignments"
         ],
-        "description": "Assigned active section trainer with edit_learning and MFA (aal2). A role label alone grants no capability.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Assigned active section trainer with edit_learning and MFA (aal2). A role label alone grants no capability.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -4936,7 +7221,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -5062,7 +7366,7 @@
         "tags": [
           "Lessons and assignments"
         ],
-        "description": "Assigned active section trainer with edit_learning and MFA (aal2). A role label alone grants no capability. Draft rules may remain null; publication requires complete supported rules.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Assigned active section trainer with edit_learning and MFA (aal2). A role label alone grants no capability. Draft rules may remain null; publication requires complete supported rules.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -5124,7 +7428,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -5250,7 +7573,7 @@
         "tags": [
           "Lessons and assignments"
         ],
-        "description": "Assigned active section trainer with edit_learning and MFA (aal2). A role label alone grants no capability. Saved non-empty content/resource is required; published content is immutable in this increment.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Assigned active section trainer with edit_learning and MFA (aal2). A role label alone grants no capability. Saved non-empty content/resource is required; published content is immutable in this increment.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -5312,7 +7635,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -5438,7 +7780,7 @@
         "tags": [
           "Lessons and assignments"
         ],
-        "description": "Assigned active section trainer with edit_learning and MFA (aal2). A role label alone grants no capability. Requires individual mode, format, opening, deadline choice, late policy, attempts and max score.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Assigned active section trainer with edit_learning and MFA (aal2). A role label alone grants no capability. Requires individual mode, format, opening, deadline choice, late policy, attempts and max score.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -5500,7 +7842,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -5627,7 +7988,7 @@
         "tags": [
           "Lessons and assignments"
         ],
-        "description": "Assigned active section trainer with edit_learning and MFA (aal2). A role label alone grants no capability. Current revision and closing reason required.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Assigned active section trainer with edit_learning and MFA (aal2). A role label alone grants no capability. Current revision and closing reason required.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -5689,7 +8050,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -5816,7 +8196,7 @@
         "tags": [
           "Lessons and assignments"
         ],
-        "description": "Active eligible trainee in this class. Server enforces published version, format, time/late policy and attempt limit. Reuse the request UUID only for an identical retry.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Active eligible trainee in this class. Server enforces published version, format, time/late policy and attempt limit. Reuse the request UUID only for an identical retry.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -5878,7 +8258,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -6005,7 +8404,7 @@
         "tags": [
           "Lessons and assignments"
         ],
-        "description": "Assigned active section trainer with grade_work and MFA (aal2); no self-grading. Editing alone does not expose private reports. Only the latest submission version; retain the last published learner snapshot until release.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Assigned active section trainer with grade_work and MFA (aal2); no self-grading. Editing alone does not expose private reports. Only the latest submission version; retain the last published learner snapshot until release.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -6067,7 +8466,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -6194,7 +8612,7 @@
         "tags": [
           "Lessons and assignments"
         ],
-        "description": "Assigned active section trainer with grade_work and MFA (aal2); no self-grading. Editing alone does not expose private reports. Current grade revision and release reason required.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Assigned active section trainer with grade_work and MFA (aal2); no self-grading. Editing alone does not expose private reports. Current grade revision and release reason required.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -6256,7 +8674,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -6439,7 +8876,45 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -6525,7 +9000,7 @@
         "tags": [
           "Quizzes"
         ],
-        "description": "Assigned active section trainer with edit_learning and MFA (aal2). A role label alone grants no capability. At most 15 questions; total definition/encoded text bounds also apply.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Assigned active section trainer with edit_learning and MFA (aal2). A role label alone grants no capability. At most 15 questions; total definition/encoded text bounds also apply.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -6587,7 +9062,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -6765,7 +9259,7 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -6785,6 +9279,25 @@
           },
           "403": {
             "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -6929,7 +9442,7 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -6949,6 +9462,25 @@
           },
           "403": {
             "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -7105,7 +9637,7 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -7125,6 +9657,25 @@
           },
           "403": {
             "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -7269,7 +9820,7 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -7289,6 +9840,25 @@
           },
           "403": {
             "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -7375,7 +9945,7 @@
         "tags": [
           "Quizzes"
         ],
-        "description": "Assigned active section trainer with edit_learning and MFA (aal2). A role label alone grants no capability. A published game quiz is required; at most one active run exists per quiz.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Assigned active section trainer with edit_learning and MFA (aal2). A role label alone grants no capability. A published game quiz is required; at most one active run exists per quiz.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -7437,7 +10007,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -7564,7 +10153,7 @@
         "tags": [
           "Quizzes"
         ],
-        "description": "Active trainee enrolled in this section. Quiz participants must not hold editing/grading permissions in that class. Server sets deadline and attempt count. Identical UUID retries and an existing active attempt resume safely. Browser fullscreen is client preflight, not server-verifiable device attestation.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Active trainee enrolled in this section. Quiz participants must not hold editing/grading permissions in that class. Server sets deadline and attempt count. Identical UUID retries and an existing active attempt resume safely. Browser fullscreen is client preflight, not server-verifiable device attestation.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -7626,7 +10215,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -7753,7 +10361,7 @@
         "tags": [
           "Quizzes"
         ],
-        "description": "Assigned active section trainer with edit_learning and MFA (aal2). A role label alone grants no capability. Publishing requires complete settings/keys; closing stops new work and running games. Expired/closed exams finalize lazily from accepted saves when read/saved/reported.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Assigned active section trainer with edit_learning and MFA (aal2). A role label alone grants no capability. Publishing requires complete settings/keys; closing stops new work and running games. Expired/closed exams finalize lazily from accepted saves when read/saved/reported.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -7815,7 +10423,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -7994,7 +10621,7 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -8014,6 +10641,25 @@
           },
           "403": {
             "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -8157,7 +10803,7 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -8177,6 +10823,25 @@
           },
           "403": {
             "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -8265,7 +10930,7 @@
         "tags": [
           "Quizzes"
         ],
-        "description": "Active trainee enrolled in this section. Quiz participants must not hold editing/grading permissions in that class. Owner only. Use the current attempt revision; preserve unsaved edits on conflict. At/after deadline or close, only previously accepted answers count. Submitted attempts cannot be overwritten.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Active trainee enrolled in this section. Quiz participants must not hold editing/grading permissions in that class. Owner only. Use the current attempt revision; preserve unsaved edits on conflict. At/after deadline or close, only previously accepted answers count. Submitted attempts cannot be overwritten.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -8327,7 +10992,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -8454,7 +11138,7 @@
         "tags": [
           "Quizzes"
         ],
-        "description": "Active trainee enrolled in this section. Quiz participants must not hold editing/grading permissions in that class. Owner active monitored attempt only. Server receipt time/actor are derived; duplicate event UUIDs are safe. At most 200 signals per attempt; closed/expired attempts add no events. No penalty/score changes.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Active trainee enrolled in this section. Quiz participants must not hold editing/grading permissions in that class. Owner active monitored attempt only. Server receipt time/actor are derived; duplicate event UUIDs are safe. At most 200 signals per attempt; closed/expired attempts add no events. No penalty/score changes.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -8516,7 +11200,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -8695,7 +11398,7 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -8715,6 +11418,25 @@
           },
           "403": {
             "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -8802,7 +11524,7 @@
         "tags": [
           "Quizzes"
         ],
-        "description": "Active trainee enrolled in this section. Quiz participants must not hold editing/grading permissions in that class. Existing joins are idempotent. New joining closes at the first question. Actor is never supplied in the body.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Active trainee enrolled in this section. Quiz participants must not hold editing/grading permissions in that class. Existing joins are idempotent. New joining closes at the first question. Actor is never supplied in the body.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -8864,7 +11586,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -8991,7 +11732,7 @@
         "tags": [
           "Quizzes"
         ],
-        "description": "Active trainee enrolled in this section. Quiz participants must not hold editing/grading permissions in that class. Must have joined. Server validates IDs, deadline and scoring; identical retries are safe and different answers cannot overwrite a locked answer.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Active trainee enrolled in this section. Quiz participants must not hold editing/grading permissions in that class. Must have joined. Server validates IDs, deadline and scoring; identical retries are safe and different answers cannot overwrite a locked answer.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -9053,7 +11794,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -9180,7 +11940,7 @@
         "tags": [
           "Quizzes"
         ],
-        "description": "Assigned active section trainer with edit_learning and MFA (aal2). A role label alone grants no capability. Use the current run revision and reason. Timer expiry reveals automatically; teacher controls subsequent advancement. Equal scores share a rank and do not decide program awards.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Assigned active section trainer with edit_learning and MFA (aal2). A role label alone grants no capability. Use the current run revision and reason. Timer expiry reveals automatically; teacher controls subsequent advancement. Equal scores share a rank and do not decide program awards.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -9242,7 +12002,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -9421,7 +12200,45 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -9507,7 +12324,7 @@
         "tags": [
           "Project boards"
         ],
-        "description": "Explicit edition manage_projects plus MFA. No self-grant or automatic role-based grant. Live grants start empty and must follow the approved school/operator process. Supply all capacities and 2–8 unique columns explicitly. Used columns cannot be removed; capacities cannot shrink below active assignments.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Explicit edition manage_projects plus MFA. No self-grant or automatic role-based grant. Live grants start empty and must follow the approved school/operator process. Supply all capacities and 2–8 unique columns explicitly. Used columns cannot be removed; capacities cannot shrink below active assignments.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -9569,7 +12386,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -9747,7 +12583,7 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -9767,6 +12603,25 @@
           },
           "403": {
             "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -9922,7 +12777,7 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -9942,6 +12797,25 @@
           },
           "403": {
             "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -10027,7 +12901,7 @@
         "tags": [
           "Project boards"
         ],
-        "description": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Task changes additionally require assigned can_tasks, unless authorized project oversight. Archived projects/tasks are read-only. New tasks use revision 0 and a stable request UUID for identical retries. Assignees must be active project participants, sprints belong to the same project, and new assignments cannot target closed sprints. Previously retained inactive/closed links remain historical.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Task changes additionally require assigned can_tasks, unless authorized project oversight. Archived projects/tasks are read-only. New tasks use revision 0 and a stable request UUID for identical retries. Assignees must be active project participants, sprints belong to the same project, and new assignments cannot target closed sprints. Previously retained inactive/closed links remain historical.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -10089,7 +12963,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -10283,7 +13176,7 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -10303,6 +13196,25 @@
           },
           "403": {
             "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -10442,7 +13354,7 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -10462,6 +13374,25 @@
           },
           "403": {
             "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -10549,7 +13480,7 @@
         "tags": [
           "Project boards"
         ],
-        "description": "Explicit edition manage_projects plus MFA. No self-grant or automatic role-based grant. Live grants start empty and must follow the approved school/operator process. Active edition membership is required for activation. Participant/mentor/advisor capacities are independent. New member revision is 0. Archived boards permit revocation only: inactive, all rights false. This does not finalize team composition or grant an edition role.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Explicit edition manage_projects plus MFA. No self-grant or automatic role-based grant. Live grants start empty and must follow the approved school/operator process. Active edition membership is required for activation. Participant/mentor/advisor capacities are independent. New member revision is 0. Archived boards permit revocation only: inactive, all rights false. This does not finalize team composition or grant an edition role.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -10611,7 +13542,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -10737,7 +13687,7 @@
         "tags": [
           "Project boards"
         ],
-        "description": "Explicit edition manage_projects plus MFA. No self-grant or automatic role-based grant. Live grants start empty and must follow the approved school/operator process. Current project revision and reason required. Records and permitted reads remain; reopening is not implemented.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Explicit edition manage_projects plus MFA. No self-grant or automatic role-based grant. Live grants start empty and must follow the approved school/operator process. Current project revision and reason required. Records and permitted reads remain; reopening is not implemented.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -10799,7 +13749,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -10925,7 +13894,7 @@
         "tags": [
           "Project boards"
         ],
-        "description": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Task changes additionally require assigned can_tasks, unless authorized project oversight. Archived projects/tasks are read-only. Current task revision and reason required.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Task changes additionally require assigned can_tasks, unless authorized project oversight. Archived projects/tasks are read-only. Current task revision and reason required.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -10987,7 +13956,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -11113,7 +14101,7 @@
         "tags": [
           "Project boards"
         ],
-        "description": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Requires explicitly assigned can_comment or authorized oversight; project/task must be active. Identical UUID/task/author/body retries are idempotent; a reused UUID cannot overwrite a comment.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Requires explicitly assigned can_comment or authorized oversight; project/task must be active. Identical UUID/task/author/body retries are idempotent; a reused UUID cannot overwrite a comment.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -11175,7 +14163,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -11301,7 +14308,7 @@
         "tags": [
           "Project boards"
         ],
-        "description": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Requires can_sprints or authorized oversight and an unarchived project. Supply explicit dates; only planned sprints may be edited. At most 100 plans per project.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Requires can_sprints or authorized oversight and an unarchived project. Supply explicit dates; only planned sprints may be edited. At most 100 plans per project.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -11363,7 +14370,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -11489,7 +14515,7 @@
         "tags": [
           "Project boards"
         ],
-        "description": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Requires can_sprints or authorized oversight, current sprint revision and reason. Only one active sprint per project. Closing retains incomplete work and performs no automatic carryover or grading.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Requires can_sprints or authorized oversight, current sprint revision and reason. Only one active sprint per project. Closing retains incomplete work and performs no automatic carryover or grading.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -11551,7 +14577,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -11697,7 +14742,7 @@
         "tags": [
           "Project boards"
         ],
-        "description": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Requires can_sprints or authorized oversight, current sprint revision and reason. Only one active sprint per project. Closing retains incomplete work and performs no automatic carryover or grading.\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.",
+        "description": "Active edition membership plus active membership in this project, or explicitly assigned edition manage_projects plus MFA. Teaching assignments and role labels do not grant project access. Requires can_sprints or authorized oversight, current sprint revision and reason. Only one active sprint per project. Closing retains incomplete work and performs no automatic carryover or grading.\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.",
         "parameters": [
           {
             "name": "id",
@@ -11759,7 +14804,26 @@
             }
           },
           "401": {
-            "description": "Sign in with a valid Supabase user access token.",
+            "description": "Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.",
+            "headers": {
+              "Cache-Control": {
+                "description": "API data must not be cached.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Scope, verified eligibility, MFA or permitted resource state is unavailable.",
             "headers": {
               "Cache-Control": {
                 "description": "API data must not be cached.",
@@ -11901,14 +14965,236 @@
   },
   "components": {
     "securitySchemes": {
+      "BrowserCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "__Host-lms_session",
+        "description": "Opaque Secure/HttpOnly/host-only cookie issued by server login. JavaScript cannot read it. No provider token is stored in this cookie. Use session-bound CSRF and origin checks on browser writes."
+      },
       "BearerAuth": {
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT",
-        "description": "Supabase USER access token, validated by Auth. Never use a service-role/secret key as a user token. Membership, capability, scope and MFA are enforced separately. Some owner/trainer paths require MFA only for privileged access; read operation descriptions."
+        "description": "Optional API-client Supabase USER access token, validated by Auth. The LMS browser never receives or sends this token. Never use a service-role/secret key as a user token. Capability, scope and MFA remain separate. Do not combine with the browser cookie."
       }
     },
     "schemas": {
+      "BrowserSession": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+                "example": "00000000-0000-4000-8000-000000000001"
+              }
+            },
+            "required": [
+              "id"
+            ],
+            "additionalProperties": false
+          },
+          "csrfToken": {
+            "type": "string",
+            "maxLength": 43,
+            "minLength": 43,
+            "pattern": "^[A-Za-z0-9_-]{43}$",
+            "description": "Session-bound CSRF value. It is not a provider access/refresh token or the opaque HttpOnly cookie."
+          }
+        },
+        "required": [
+          "user",
+          "csrfToken"
+        ],
+        "additionalProperties": false
+      },
+      "BrowserSessionState": {
+        "type": "object",
+        "properties": {
+          "configured": {
+            "type": "boolean"
+          },
+          "session": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BrowserSession"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "configured",
+          "session"
+        ],
+        "additionalProperties": false
+      },
+      "BrowserLogin": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "minLength": 1
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ],
+        "additionalProperties": false
+      },
+      "RedeemInvitation": {
+        "type": "object",
+        "properties": {
+          "tokenHash": {
+            "type": "string",
+            "maxLength": 2048,
+            "minLength": 1,
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "tokenHash"
+        ],
+        "additionalProperties": false
+      },
+      "BrowserLogout": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "const": "signed_out"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "BrowserFactors": {
+        "type": "object",
+        "properties": {
+          "factors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+                  "example": "00000000-0000-4000-8000-000000000001"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "verified",
+                    "unverified"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "status"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "factors"
+        ],
+        "additionalProperties": false
+      },
+      "BrowserPassword": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 12,
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "password"
+        ],
+        "additionalProperties": false
+      },
+      "BrowserVerify": {
+        "type": "object",
+        "properties": {
+          "factorId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+            "example": "00000000-0000-4000-8000-000000000001"
+          },
+          "code": {
+            "type": "string",
+            "maxLength": 6,
+            "pattern": "^[0-9]{6}$",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "factorId",
+          "code"
+        ],
+        "additionalProperties": false
+      },
+      "BrowserAccountSaved": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "const": "saved"
+          },
+          "session": {
+            "$ref": "#/components/schemas/BrowserSession"
+          }
+        },
+        "required": [
+          "status",
+          "session"
+        ],
+        "additionalProperties": false
+      },
+      "BrowserEnrollment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+            "example": "00000000-0000-4000-8000-000000000001"
+          },
+          "uri": {
+            "type": "string",
+            "maxLength": 2048,
+            "description": "Private authenticator enrollment URI. Display only in this authenticated setup, never log or export it."
+          },
+          "session": {
+            "$ref": "#/components/schemas/BrowserSession"
+          }
+        },
+        "required": [
+          "id",
+          "uri",
+          "session"
+        ],
+        "additionalProperties": false
+      },
       "Error": {
         "type": "object",
         "properties": {

@@ -4,6 +4,8 @@ import tailwindcss from '@tailwindcss/vite'
 import { cloudflare } from '@cloudflare/vite-plugin'
 
 export default defineConfig({
+  // Custom environment variables are never injected into the browser bundle.
+  envPrefix: [],
   plugins: [react(), tailwindcss(), cloudflare()],
   server: {
     host: '127.0.0.1',

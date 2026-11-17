@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
-import type { Session } from '@supabase/supabase-js'
+import type { BrowserSession as Session } from '../shared/session'
 import { Camera, Check, Clock3, RefreshCw, ShieldCheck } from 'lucide-react'
-import { api, auth } from './lib'
+import { api, accountAction, authFactors } from './lib'
 import { CameraScanner } from './CameraScanner'
 import { attendanceCondition, type AttendanceSummary, type LeaveRow, type RosterRow, type TeachingSession } from '../shared/attendance'
 import type { Role, Section } from '../shared/domain'
@@ -50,7 +50,7 @@ export function Attendance({ session, edition, role, classes }: { session: Sessi
 
   async function load() {
     if (!session || !edition) return
-    const data = await api<Bundle>(`/editions/${edition}/attendance`, session.access_token)
+    const data = await api<Bundle>(`/editions/${edition}/attendance`, session.csrfToken)
     setBundle(data)
     setSelected(current => data.sessions.some(s => s.id === current) ? current : data.sessions[0]?.id ?? '')
   }
@@ -59,11 +59,11 @@ export function Attendance({ session, edition, role, classes }: { session: Sessi
     let cancelled = false
     setBundle({ sessions: [], summary: null, leave: [] }); setSelected(''); setBusy(true)
     if (!edition) { setBusy(false); return }
-    api<Bundle>(`/editions/${edition}/attendance`, session.access_token).then(data => {
+    api<Bundle>(`/editions/${edition}/attendance`, session.csrfToken).then(data => {
       if (!cancelled) { setBundle(data); setSelected(data.sessions[0]?.id ?? '') }
     }).catch(e => { if (!cancelled) setMessage(e.message) }).finally(() => { if (!cancelled) setBusy(false) })
     return () => { cancelled = true }
-  }, [session?.access_token, edition])
+  }, [session?.csrfToken, edition])
   useEffect(() => {
     const timer = setInterval(() => setClock(Date.now() + clockOffset), 250)
     return () => clearInterval(timer)
@@ -72,9 +72,9 @@ export function Attendance({ session, edition, role, classes }: { session: Sessi
     setScanning(false); setCode(''); setRoster(live ? [] : sampleRoster); setCorrectionReasons({})
     if (!session || !selected || !active) return
     let cancelled = false
-    api<RosterRow[]>(`/attendance/${selected}/roster`, session.access_token).then(rows => { if (!cancelled) setRoster(rows) }).catch(e => { if (!cancelled) setMessage(e.message) })
+    api<RosterRow[]>(`/attendance/${selected}/roster`, session.csrfToken).then(rows => { if (!cancelled) setRoster(rows) }).catch(e => { if (!cancelled) setMessage(e.message) })
     return () => { cancelled = true }
-  }, [selected, session?.access_token, active?.version])
+  }, [selected, session?.csrfToken, active?.version])
   useEffect(() => {
     setChallenge(null); setDisplayError('')
     if (!active?.is_trainer || active.status !== 'open') return
@@ -87,7 +87,7 @@ export function Attendance({ session, edition, role, classes }: { session: Sessi
           if (!disposed) timer = setTimeout(refresh, Math.max(100, next - now + 30))
           return
         }
-        const received = await api<Challenge>(`/attendance/${selected}/challenge`, session.access_token)
+        const received = await api<Challenge>(`/attendance/${selected}/challenge`, session.csrfToken)
         if (disposed) return
         setChallenge(received); setClockOffset(received.serverTime - Date.now()); setDisplayError('')
         timer = setTimeout(refresh, Math.max(100, received.rotatesAt - received.serverTime + 30))
@@ -95,14 +95,14 @@ export function Attendance({ session, edition, role, classes }: { session: Sessi
     }
     void refresh()
     return () => { disposed = true; if (timer) clearTimeout(timer) }
-  }, [active?.id, active?.status, active?.is_trainer, session?.access_token])
+  }, [active?.id, active?.status, active?.is_trainer, session?.csrfToken])
 
   async function action(path: string, body: unknown, success: string) {
     if (!session || busy) return
     setBusy(true); setMessage('')
     try {
-      await api(path, session.access_token, body); await load()
-      if (selected) setRoster(await api<RosterRow[]>(`/attendance/${selected}/roster`, session.access_token))
+      await api(path, session.csrfToken, body); await load()
+      if (selected) setRoster(await api<RosterRow[]>(`/attendance/${selected}/roster`, session.csrfToken))
       setMessage(success)
     } catch (error) { setMessage((error as Error).message) }
     finally { setBusy(false) }
@@ -132,15 +132,13 @@ export function Attendance({ session, edition, role, classes }: { session: Sessi
     setLeaveNote('')
   }
   async function verifyMfa(e: React.FormEvent) {
-    e.preventDefault(); if (!auth) return
+    e.preventDefault(); if (!session) return
     setBusy(true)
     try {
-      const factors = await auth.auth.mfa.listFactors()
-      if (factors.error) throw new Error('Unable to load authenticator')
-      const factor = factors.data.totp.find(f => f.status === 'verified')
+      const factors = await authFactors()
+      const factor = factors.find(f => f.status === 'verified')
       if (!factor) throw new Error('Enroll a verified authenticator through your approved platform-owner process first.')
-      const response = await auth.auth.mfa.challengeAndVerify({ factorId: factor.id, code: mfaCode })
-      if (response.error) throw new Error('Authenticator code could not be verified')
+      await accountAction('verify',{factorId:factor.id,code:mfaCode})
       setMfaCode(''); setMessage('MFA verified. Permissions still depend on your assigned capabilities.')
     } catch (error) { setMessage((error as Error).message) } finally { setBusy(false) }
   }

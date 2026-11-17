@@ -32,6 +32,16 @@ const questionDefinition = kind => object({ ...questionBase, kind: { const: kind
 const attendanceState = choices(['unverified', 'present', 'absent', 'approved_leave', 'pending_review'])
 const leaveState = choices(['pending', 'approved', 'rejected', 'superseded'])
 export const schemas = {
+ BrowserSession: object({user:object({id:uuid}),csrfToken:string(43,{minLength:43,pattern:'^[A-Za-z0-9_-]{43}$',description:'Session-bound CSRF value. It is not a provider access/refresh token or the opaque HttpOnly cookie.'})}),
+ BrowserSessionState: object({configured:bool,session:nullable(ref('BrowserSession'))}),
+ BrowserLogin: object({email:string(254,{minLength:1}),password:string(128,{minLength:1,writeOnly:true})}),
+ RedeemInvitation: object({tokenHash:string(2048,{minLength:1,writeOnly:true})}),
+ BrowserLogout: object({status:{const:'signed_out'}}),
+ BrowserFactors: object({factors:array(object({id:uuid,status:choices(['verified','unverified'])}))}),
+ BrowserPassword: object({password:string(128,{minLength:12,writeOnly:true})}),
+ BrowserVerify: object({factorId:uuid,code:string(6,{pattern:'^[0-9]{6}$',writeOnly:true})}),
+ BrowserAccountSaved: object({status:{const:'saved'},session:ref('BrowserSession')}),
+ BrowserEnrollment: object({id:uuid,uri:string(2048,{description:'Private authenticator enrollment URI. Display only in this authenticated setup, never log or export it.'}),session:ref('BrowserSession')}),
  Error: object({ error: string(undefined, { minLength: 1 }) }),
  UUID: uuid, Timestamp: time, Revision: version, DraftRevision: draftVersion,
  ScoreUnits: points, ResourceUrl: url, LinkInput: linkInput,

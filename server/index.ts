@@ -8,19 +8,33 @@ import { attendance } from './attendance'
 import { learning } from './learning'
 import { quizzes } from './quizzes'
 import { projects } from './projects'
+import { browserAuth } from './auth'
+import { SESSION_COOKIE, SessionFault, readWebSession, requireBrowserOrigin, requireCsrf } from './web-session'
+import { getCookie } from 'hono/cookie'
 export const app = new Hono<Env>()
 app.use('/api/*', secureHeaders({ referrerPolicy: 'no-referrer', xFrameOptions: 'DENY', permissionsPolicy: { camera: ['self'], microphone: [] } }))
 app.use('/api/*', async (c,next) => { c.header('Cache-Control','no-store'); await next() })
 app.use('/api/*', bodyLimit({ maxSize: 32768, onError: c => c.json({ error: 'Request too large' },413) }))
 app.get('/api/health', c => c.json({ status: 'ok', version: '0.4.0' }))
 app.route('/api/public',publicAdmissions)
+app.route('/api/auth',browserAuth)
 app.use('/api/*', async (c,next) => {
-  const token = c.req.header('Authorization')?.match(/^Bearer ([^\s]+)$/)?.[1]
+  let token = c.req.header('Authorization')?.match(/^Bearer ([^\s]+)$/)?.[1]
+  let browserUserId:string|undefined
+  if(getCookie(c,SESSION_COOKIE)){
+    if(token)return c.json({error:'Use one authentication method per request'},401)
+    if(!['GET','HEAD'].includes(c.req.method))requireBrowserOrigin(c)
+    const session=await readWebSession(c)
+    if(!session)return c.json({error:'Sign in required'},401)
+    if(!['GET','HEAD'].includes(c.req.method))requireCsrf(c,session)
+    token=session.credentials.access_token
+    browserUserId=session.userId
+  }
   if (!token) return c.json({ error: 'Sign in required' },401)
   if (!c.env.SUPABASE_URL || !c.env.SUPABASE_PUBLISHABLE_KEY) return c.json({ error: 'Live service is not configured' },503)
   // Caller context only: no service-role bypass. getUser validates with Auth, not JWT decoding.
   const db = createClient(c.env.SUPABASE_URL,c.env.SUPABASE_PUBLISHABLE_KEY,{ global: { headers: { Authorization: `Bearer ${token}` } }, auth: { persistSession: false, autoRefreshToken: false } })
-  const { data, error } = await db.auth.getUser(token)
+  const { data, error } = browserUserId?{data:{user:{id:browserUserId}},error:null}:await db.auth.getUser(token)
   if (error || !data.user) return c.json({ error: 'Session is invalid or expired' },401)
   c.set('db',db); c.set('userId',data.user.id); await next()
 })
@@ -58,5 +72,5 @@ app.route('/api',learning)
 app.route('/api',quizzes)
 app.route('/api',projects)
 app.notFound(c => c.json({ error: 'Not found' },404))
-app.onError((_error,c) => c.json({ error: 'Request failed' },500))
+app.onError((error,c) => error instanceof SessionFault?c.json({error:error.message},error.status):c.json({ error: 'Request failed' },500))
 export default { fetch: app.fetch, scheduled: (_event:unknown,env:Bindings,ctx:{waitUntil(promise:Promise<unknown>):void})=>ctx.waitUntil(runInvitationJobs(env)) }
