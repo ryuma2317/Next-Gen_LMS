@@ -1,5 +1,7 @@
 # Git handover result
 
+Security continuation (2026-11-17): unmerged PR #27 / issues #26 and #28 use fix/26-server-sessions. Initial remote source 2cf6c851433408139a0fdec6b71af0c9b73f1195 matches local 45c3177360f75221926927102ea73a63b4527cd1/tree a45ad6519c44b1250261b4eb5fede298f18c4819. The test-type fix is remote a9010e008ac6e8abd75519b887b20efbd3126aed (tree a303cb271eb1603d29b188031e7d48e617572f35, local 994edcc26d92648001a679b6f7cf6be25bbb21e8). Run 43996884739 passes native/API/PGlite/type/build/leakage checks but fails a mobile status-label assertion. The next increment corrects that assertion and adds forward migration 016 for atomic handle rotation. The PR/issues record actual later commits/checks/merge status; no deployment, production acceptance or main change.
+
 ## Server-session security continuation
 
 Issue [#26](https://github.com/ryuma2317/Next-Gen_LMS/issues/26), fix/26-server-sessions, starts from verified dev b0ef7e7295b4eaac4e486e072f1a1fcbee4f46be after PR #25. Work is isolated in tmp/security-handoff; no root metadata is changed. Sources add server-held encrypted browser sessions, CSRF/lease boundaries, explicit configuration and publication/build checks. Native checks pass (39); full exact-head CI and merge are pending at this source snapshot. The issue/PR records actual subsequent commits/checks/merge status. No live secret, participant data, deployment, subscription or main merge is included. Apply the complete migration set through 015 only through approved isolated verification/release.

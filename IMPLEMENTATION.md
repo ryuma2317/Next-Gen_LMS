@@ -1,5 +1,7 @@
 # Implementation and next steps
 
+Security review continuation (2026-11-17): forward migration 016 adds atomic opaque-handle rotation after MFA/password updates (#28), preserving absolute/idle deadlines and invalidating the previous handle. Every migration through 016 is now required. The earlier source passed 39 native + 94 API/PGlite tests, type checks, build and client-bundle leakage checks in run 43996884739; one mobile test incorrectly expected a hidden status label. The rotation increment corrects that test and adds direct-RPC/HTTP stale-handle coverage. It still needs exact-head CI before merging PR #27. No real-provider/security acceptance is claimed.
+
 ## Server-held browser sessions (issue #26, 2026-11-12)
 
 The owner requested server-side token handling. Sources on fix/26-server-sessions from dev b0ef7e7295b4eaac4e486e072f1a1fcbee4f46be replace the browser Supabase client with same-origin auth endpoints, sanitized metadata and a random Secure/HttpOnly host cookie. Migration 015 stores hashed handles and encrypted provider credentials behind service-only RPCs, explicit lifetimes and versioned refresh/MFA leases. Origin/JSON/custom-header/session-bound CSRF checks protect cookie writes. Login, explicit invitation redemption, logout, password and TOTP operations are server-side; caller-context RLS and separate API-client Bearer access remain intact.

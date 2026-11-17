@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import type { Env } from './types'
-import { SessionFault, authLimit, clearSessionCookie, leaseWebSession, provider, providerCredentials, readWebSession, requiredConfig, requireBrowserOrigin, requireCsrf, revokeWebSession, saveWebSession, sessionConfig, startWebSession } from './web-session'
+import { SessionFault, authLimit, clearSessionCookie, leaseWebSession, provider, providerCredentials, readWebSession, requiredConfig, requireBrowserOrigin, requireCsrf, revokeWebSession, rotateWebSession, saveWebSession, sessionConfig, startWebSession } from './web-session'
 import { randomSecret } from './session-crypto'
 export const browserAuth=new Hono<Env>()
 const shape=(v:unknown,keys:string[]):v is Record<string,unknown>=>!!v&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).sort().join(',')===[...keys].sort().join(',')
@@ -60,13 +60,18 @@ browserAuth.post('/account/:action',async c=>{
  const body:unknown=await c.req.json().catch(()=>null)
  if(action==='password'&&(!shape(body,['password'])||typeof body.password!=='string'||body.password.length<12||body.password.length>128)||action==='enroll'&&!shape(body,[])||action==='verify'&&(!shape(body,['factorId','code'])||typeof body.factorId!=='string'||!/^[0-9a-f-]{36}$/i.test(body.factorId)||typeof body.code!=='string'||!/^\d{6}$/.test(body.code)))return c.json({error:'Check the account action fields'},400)
  const lease=await leaseWebSession(c.env,session),db=provider(c.env)
- const restored=await db.auth.setSession(session.credentials)
+ let restored
+ try{restored=await db.auth.setSession(session.credentials)}catch{await revokeWebSession(c.env,session.hash);clearSessionCookie(c);throw new SessionFault(503,'Account session unavailable. Sign in again.')}
  if(restored.error){await revokeWebSession(c.env,session.hash);clearSessionCookie(c);return c.json({error:'Sign in again before updating your account'},401)}
  let payload:Record<string,unknown>={status:'saved'},next=session.credentials,providerChanged=false
  try{
   if(action==='password'){
    const result=await db.auth.updateUser({password:(body as {password:string}).password})
    if(result.error)throw new SessionFault(409,'Password update unavailable. Check provider security requirements.')
+   providerChanged=true
+   const current=await db.auth.getSession()
+   if(current.error)throw new SessionFault(503,'Unable to confirm account session')
+   next=providerCredentials(current.data.session,randomSecret(),session.userId)
   }else if(action==='enroll'){
    if(session.user?.factors?.some(f=>f.factor_type==='totp'))throw new SessionFault(409,'Authenticator setup already exists. Verify it or contact the platform owner.')
    const result=await db.auth.mfa.enroll({factorType:'totp',friendlyName:'Next-Gen authenticator'})
@@ -80,12 +85,16 @@ browserAuth.post('/account/:action',async c=>{
    providerChanged=true
    const current=await db.auth.getSession()
    if(current.error)throw new SessionFault(503,'Unable to confirm verified session')
-   next=providerCredentials(current.data.session,randomSecret())
+   next=providerCredentials(current.data.session,randomSecret(),session.userId)
   }
-  await saveWebSession(c.env,session,lease,next)
+  if(action==='enroll'){
+   const current=await db.auth.getSession()
+   if(current.error)throw new SessionFault(503,'Unable to confirm account session')
+   await saveWebSession(c.env,session,lease,providerCredentials(current.data.session,session.credentials.csrfToken,session.userId))
+  }else await rotateWebSession(c,session,lease,next)
  }catch(error){
   // Release a failed operation without letting stale completions overwrite newer state.
-  try{if(providerChanged)throw error;await saveWebSession(c.env,session,lease,session.credentials)}catch{await revokeWebSession(c.env,session.hash);clearSessionCookie(c)}
+  try{if(providerChanged)throw error;const current=await db.auth.getSession();if(current.error)throw error;await saveWebSession(c.env,session,lease,providerCredentials(current.data.session,session.credentials.csrfToken,session.userId))}catch{await revokeWebSession(c.env,session.hash);clearSessionCookie(c)}
   throw error
  }
  return c.json({...payload,session:{user:{id:session.userId},csrfToken:next.csrfToken}})

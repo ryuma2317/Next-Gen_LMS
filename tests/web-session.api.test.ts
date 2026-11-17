@@ -29,6 +29,7 @@ beforeEach(()=>{
   if(name==='web_session_load')return {data:row?{...row}:null,error:null}
   if(name==='web_session_lease'){const ok=!!row&&row.version===args.p_version&&!row.lease_active;if(ok){row.lease_active=true;row.lease=args.p_lease}return {data:ok,error:null}}
   if(name==='web_session_save'){const ok=!!row&&row.version===args.p_version&&row.lease===args.p_lease;if(ok){row.sealed_credentials=args.p_sealed;row.version++;row.lease_active=false}return {data:ok,error:null}}
+  if(name==='web_session_rotate'){const ok=!!row&&row.version===args.p_version&&row.lease===args.p_lease;if(ok){rows.delete(args.p_hash);rows.set(args.p_new_hash,{...row,sealed_credentials:args.p_sealed,version:row.version+1,lease_active:false})}return {data:ok,error:null}}
   if(name==='web_session_revoke'){rows.delete(args.p_hash);return {data:null,error:null}}
   return {data:null,error:null}
  })
@@ -110,13 +111,23 @@ it('redemption is explicit POST, validates shape and never returns provider invi
  expect(JSON.stringify(await result.json())).not.toContain(providerSession.access_token)
  expect(mocked.verifyOtp).toHaveBeenCalledWith({token_hash:'synthetic-invitation-proof',type:'invite'})
 })
-it('lists only TOTP factor identity/status and verifies MFA server-side with rotated CSRF',async()=>{
+it('lists only TOTP status and rotates handle/CSRF after MFA and password updates',async()=>{
  const {cookie,csrf}=await login(),factors=await request('/auth/mfa',undefined,{Cookie:cookie})
  expect(await factors.json()).toEqual({factors:[{id:factor,status:'verified'}]})
  const result=await request('/auth/account/verify',{factorId:factor,code:'123456'},cookieHeaders(cookie,csrf));expect(result.status).toBe(200)
  const data=await result.json();expect(data.session.csrfToken).not.toBe(csrf);expect(JSON.stringify(data)).not.toContain('mfa private')
- expect((await request('/auth/account/password',{password:'new-synthetic-password'},cookieHeaders(cookie,csrf))).status).toBe(403)
- const password=await request('/auth/account/password',{password:'new-synthetic-password'},cookieHeaders(cookie,data.session.csrfToken));expect(password.status).toBe(200)
+ const nextCookie=result.headers.get('Set-Cookie')!.split(';')[0];expect(nextCookie).not.toBe(cookie)
+ expect((await request('/enrollments',{sectionId:id},cookieHeaders(cookie,csrf))).status).toBe(401)
+ expect((await request('/auth/account/password',{password:'new-synthetic-password'},cookieHeaders(nextCookie,csrf))).status).toBe(403)
+ const password=await request('/auth/account/password',{password:'new-synthetic-password'},cookieHeaders(nextCookie,data.session.csrfToken));expect(password.status).toBe(200)
+ expect(password.headers.get('Set-Cookie')!.split(';')[0]).not.toBe(nextCookie)
+ expect((await request('/enrollments',{sectionId:id},cookieHeaders(nextCookie,data.session.csrfToken))).status).toBe(401)
+})
+it('revokes rather than saving old credentials if security-level handle rotation fails',async()=>{
+ const {cookie,csrf}=await login(),implementation=mocked.rpc.getMockImplementation()!
+ mocked.rpc.mockImplementation(async(name,args)=>name==='web_session_rotate'?{data:false,error:null}:implementation(name,args))
+ const result=await request('/auth/account/verify',{factorId:factor,code:'123456'},cookieHeaders(cookie,csrf))
+ expect(result.status).toBe(409);expect(rows.size).toBe(0)
 })
 it('rejects foreign MFA factors and repeated enrollment without removing any verified factor',async()=>{
  const {cookie,csrf}=await login()

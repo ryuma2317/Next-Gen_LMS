@@ -6,7 +6,7 @@ The entire LMS is not finished. Default screens use synthetic data. Local npm ac
 
 ## Development
 
-- Browser-auth sources require every migration through 015 and explicit server-only origin/encryption-key/expiry configuration. No Supabase browser client, provider token response, VITE secret, local/session storage credential or insecure-cookie fallback is allowed. Keep cookie CSRF/origin guards, service-only vault RPC ACLs and refresh/MFA leases intact. Run check:publication and check:bundle; scanners are bounded evidence, not proof every secret/control is safe. See SESSION_SECURITY.md.
+- Browser-auth sources require every migration through 016 and explicit server-only origin/encryption-key/expiry configuration. No Supabase browser client, provider token response, VITE secret, local/session storage credential or insecure-cookie fallback is allowed. Keep cookie CSRF/origin guards, service-only vault RPC ACLs, refresh/MFA leases and atomic handle rotation intact. Never stop at 015 for the rotation-enabled client/API. Run check:publication and check:bundle; scanners are bounded evidence, not proof every secret/control is safe. See SESSION_SECURITY.md.
 
 - Keep the sponsor-funded React/TypeScript/Vite + Hono/Workers + Supabase architecture unless a concrete requirement justifies a reviewed change. Do not add subscriptions or deploy automatically.
 - Enforce scope and workflow state in API/database paths, including direct exposed RPCs. Version comparisons must reject NULL/stale input. Use constraints/transactions for integrity and keep server secrets out of Vite/browser code.

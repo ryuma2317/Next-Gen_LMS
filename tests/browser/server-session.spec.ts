@@ -20,15 +20,15 @@ test('browser login uses same-origin server requests and safe metadata without p
  await page.getByLabel('Email',{exact:true}).fill('synthetic@example.test')
  await page.getByLabel('Password',{exact:true}).fill('synthetic-password')
  await page.getByRole('button',{name:'Sign in',exact:true}).last().click()
- await expect(page.getByText('Live connection',{exact:true})).toBeVisible()
+ await expect(page.getByRole('button',{name:'Sign out',exact:true})).toBeVisible()
  await page.reload()
- await expect(page.getByText('Live connection',{exact:true})).toBeVisible()
+ await expect(page.getByRole('button',{name:'Sign out',exact:true})).toBeVisible()
  expect(requests.every(r=>r.authorization===undefined)).toBe(true)
  expect(requests.find(r=>r.path==='/api/auth/login')?.body).toEqual({email:'synthetic@example.test',password:'synthetic-password'})
  const storage=await page.evaluate(()=>({local:{...localStorage},session:{...sessionStorage},cookie:document.cookie}))
  expect(JSON.stringify(storage)).not.toMatch(/access_token|refresh_token|synthetic-password|supabase/)
  await page.getByRole('button',{name:'Sign out',exact:true}).click()
- await expect(page.getByText('Interactive preview',{exact:true})).toBeVisible()
+ await expect(page.getByLabel('Preview as')).toBeVisible()
 })
 test('invitation URL is scrubbed and requires an explicit accept action before redemption',async({page})=>{
  let redemptions=0

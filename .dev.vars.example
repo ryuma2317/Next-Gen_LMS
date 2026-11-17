@@ -1,7 +1,7 @@
 # Worker server configuration. No provider client is created in the browser.
 SUPABASE_URL=
 SUPABASE_PUBLISHABLE_KEY=
-# Server-only key for the narrow public-intake bridge and optional invitation jobs.
+# Server-only key for the narrow session vault, public-intake bridge and optional invitation jobs.
 # NEVER copy this to a VITE variable. Leave empty to keep public writes disabled.
 SUPABASE_SECRET_KEY=
 ENABLE_INVITATIONS=false
