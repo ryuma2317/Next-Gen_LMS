@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import type { Env } from './types'
-import { SessionFault, authLimit, clearSessionCookie, leaseWebSession, provider, providerCredentials, readWebSession, requiredConfig, requireBrowserOrigin, requireCsrf, revokeWebSession, rotateWebSession, saveWebSession, sessionConfig, startWebSession } from './web-session'
+import { SessionFault, authLimit, clearSessionCookie, leaseWebSession, logoutWebSession, provider, providerCredentials, readWebSession, requiredConfig, requireBrowserOrigin, requireCsrf, revokeWebSession, rotateWebSession, saveWebSession, sessionConfig, startWebSession } from './web-session'
 import { randomSecret } from './session-crypto'
 export const browserAuth=new Hono<Env>()
 const shape=(v:unknown,keys:string[]):v is Record<string,unknown>=>!!v&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).sort().join(',')===[...keys].sort().join(',')
@@ -36,13 +36,7 @@ browserAuth.post('/invite',async c=>{
  return c.json({configured:true,session:await startWebSession(c,result.data.session,verified.data.user)})
 })
 browserAuth.post('/logout',async c=>{
- requireBrowserOrigin(c)
- const session=await readWebSession(c,false)
- if(!session){clearSessionCookie(c);return c.json({status:'signed_out'})}
- requireCsrf(c,session)
- await revokeWebSession(c.env,session.hash);clearSessionCookie(c)
- // LMS revocation succeeds even if the provider is unavailable; no token goes to the browser.
- try{const db=provider(c.env);await db.auth.setSession(session.credentials);await db.auth.signOut({scope:'local'})}catch{/* Provider revocation must be included in live acceptance. */}
+ await logoutWebSession(c)
  return c.json({status:'signed_out'})
 })
 browserAuth.get('/mfa',async c=>{

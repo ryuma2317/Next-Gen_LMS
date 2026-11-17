@@ -1,5 +1,7 @@
 # Implementation and next steps
 
+Latest security review (2026-11-17): migration 017 adds family-scoped logout through hashed handle/CSRF aliases (#29), closing rotation-before-logout response ordering without restoring prior handles' read/write access. Browser bootstrap/account responses have revision guards. All migrations through 017 are now required. Version 016 passed push run 43997796291 and PR run 43997801793: 39 native + 96 API/PGlite + 36 synthetic Chromium tests (171 total), type/build/publication/bundle checks. The family/logout increment adds direct-RPC, HTTP and stale-client-response cases and needs fresh exact-head CI before PR #27 merges. Production acceptance remains NOT RUN.
+
 Security review continuation (2026-11-17): forward migration 016 adds atomic opaque-handle rotation after MFA/password updates (#28), preserving absolute/idle deadlines and invalidating the previous handle. Every migration through 016 is now required. The earlier source passed 39 native + 94 API/PGlite tests, type checks, build and client-bundle leakage checks in run 43996884739; one mobile test incorrectly expected a hidden status label. The rotation increment corrects that test and adds direct-RPC/HTTP stale-handle coverage. It still needs exact-head CI before merging PR #27. No real-provider/security acceptance is claimed.
 
 ## Server-held browser sessions (issue #26, 2026-11-12)

@@ -1,5 +1,7 @@
 # Git handover result
 
+Latest security review (2026-11-17): remote rotation source 1ecf7dda542de719aec753e335a6c80c697256e8 matches tree 24097729d6c946b40ca7ba5f21bd05f0fb2da821/local 2aa2f2c16c3a26939d2762e0de2e7ea12bca2ace; original chain is preserved under archive/local-security-rotation. Runs 43997796291 and 43997801793 pass 171 tests, type/build/publication/bundle checks. Forward migration 017 and client-response guards close the later logout-order review finding #29; this increment still needs exact-head CI. PR #27 / issues #26/#28/#29 record actual later publication/merge evidence. No deployment or main change.
+
 Security continuation (2026-11-17): unmerged PR #27 / issues #26 and #28 use fix/26-server-sessions. Initial remote source 2cf6c851433408139a0fdec6b71af0c9b73f1195 matches local 45c3177360f75221926927102ea73a63b4527cd1/tree a45ad6519c44b1250261b4eb5fede298f18c4819. The test-type fix is remote a9010e008ac6e8abd75519b887b20efbd3126aed (tree a303cb271eb1603d29b188031e7d48e617572f35, local 994edcc26d92648001a679b6f7cf6be25bbb21e8). Run 43996884739 passes native/API/PGlite/type/build/leakage checks but fails a mobile status-label assertion. The next increment corrects that assertion and adds forward migration 016 for atomic handle rotation. The PR/issues record actual later commits/checks/merge status; no deployment, production acceptance or main change.
 
 ## Server-session security continuation

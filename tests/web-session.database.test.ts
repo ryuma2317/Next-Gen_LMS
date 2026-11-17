@@ -49,17 +49,32 @@ it('rejects expired leases and cannot resurrect revoked sessions with an old com
  expect((await service('select public.web_session_load($1) result',[hash])).rows[0].result).toBe(null)
 })
 it('rotates under a fenced lease, invalidates old handles and preserves absolute/idle deadlines',async()=>{
- const original='c'.repeat(64),rotated='d'.repeat(64)
+ const original='c'.repeat(64),rotated='d'.repeat(64),proof='e'.repeat(64)
  await service('select public.web_session_create($1,$2,$3,600,300)',[original,user,sealed])
+ await service('select public.web_session_register($1,$2)',[original,proof])
  const before=(await db.query('select expires_at,idle_expires_at from private.web_sessions where handle_hash=$1',[original])).rows[0]
  await service('select public.web_session_lease($1,1,$2)',[original,lease])
- for(const version of [null,0])expect((await service('select public.web_session_rotate($1,$2,$3,$4,$5) ok',[original,version,lease,rotated,sealed])).rows[0].ok).toBe(false)
- expect((await service('select public.web_session_rotate($1,1,$2,$3,$4) ok',[original,lease,rotated,sealed+'rotated'])).rows[0].ok).toBe(true)
+ for(const version of [null,0])expect((await service('select public.web_session_rotate($1,$2,$3,$4,$5,$6) ok',[original,version,lease,rotated,sealed,proof])).rows[0].ok).toBe(false)
+ await expect(service('select public.web_session_rotate($1,1,$2,$3,$4)',[original,lease,rotated,sealed])).rejects.toThrow()
+ expect((await service('select public.web_session_rotate($1,1,$2,$3,$4,$5) ok',[original,lease,rotated,sealed+'rotated',proof])).rows[0].ok).toBe(true)
  expect((await service('select public.web_session_load($1) result',[original])).rows[0].result).toBe(null)
  const after=(await db.query('select expires_at,idle_expires_at from private.web_sessions where handle_hash=$1',[rotated])).rows[0]
  expect(after).toEqual(before)
- expect((await service('select public.web_session_rotate($1,1,$2,$3,$4) ok',[original,lease,rotated,sealed])).rows[0].ok).toBe(false)
- await service('select public.web_session_revoke($1)',[rotated])
+ expect((await service('select public.web_session_rotate($1,1,$2,$3,$4,$5) ok',[original,lease,rotated,sealed,proof])).rows[0].ok).toBe(false)
+ expect((await service('select public.web_session_logout($1,$2) result',[original,'f'.repeat(64)])).rows[0].result.status).toBe('denied')
+ expect((await service('select public.web_session_logout($1,$2) result',[original,proof])).rows[0].result.status).toBe('revoked')
+ expect((await service('select public.web_session_load($1) result',[rotated])).rows[0].result).toBe(null)
+ expect((await db.query('select * from private.web_session_handles')).rows).toHaveLength(0)
+})
+it('logout before rotation fences the later completion and revokes aliases atomically',async()=>{
+ const original='8'.repeat(64),rotated='9'.repeat(64),proof='7'.repeat(64)
+ await service('select public.web_session_create($1,$2,$3,600,300)',[original,user,sealed])
+ await service('select public.web_session_register($1,$2)',[original,proof])
+ await service('select public.web_session_lease($1,1,$2)',[original,lease])
+ expect((await service('select public.web_session_logout($1,$2) result',[original,proof])).rows[0].result.status).toBe('revoked')
+ expect((await service('select public.web_session_rotate($1,1,$2,$3,$4,$5) ok',[original,lease,rotated,sealed,proof])).rows[0].ok).toBe(false)
+ expect((await service('select public.web_session_load($1) result',[rotated])).rows[0].result).toBe(null)
+ await db.exec('set role service_role');try{await expect(db.query('select * from private.web_session_handles')).rejects.toThrow()}finally{await db.exec('reset role')}
 })
 it('expires idle/absolute credentials without deleting program history',async()=>{
  await service('select public.web_session_create($1,$2,$3,600,300)',[other,user,sealed])

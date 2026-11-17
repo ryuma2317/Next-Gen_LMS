@@ -40,7 +40,7 @@ export async function saveWebSession(env:Bindings,session:WebSession,lease:strin
 }
 export async function rotateWebSession(c:Context<Env>,session:WebSession,lease:string,credentials:Credentials){
  const handle=randomSecret(),hash=await sessionHash(handle),sealed=await sealSession(credentials,requiredConfig(c.env).key,hash+':'+session.userId)
- if(await rpc(c.env,'web_session_rotate',{p_hash:session.hash,p_version:session.version,p_lease:lease,p_new_hash:hash,p_sealed:sealed})!==true)throw new SessionFault(409,'Session changed. Sign in again before continuing.')
+ if(await rpc(c.env,'web_session_rotate',{p_hash:session.hash,p_version:session.version,p_lease:lease,p_new_hash:hash,p_sealed:sealed,p_csrf_hash:await sessionHash(credentials.csrfToken)})!==true)throw new SessionFault(409,'Session changed. Sign in again before continuing.')
  session.hash=hash;session.credentials=credentials;session.version++
  setCookie(c,SESSION_COOKIE,handle,{path:'/',secure:true,httpOnly:true,sameSite:'Lax',maxAge:Math.max(0,Math.floor((Date.parse(session.expiresAt)-Date.now())/1000))})
 }
@@ -52,8 +52,28 @@ export async function startWebSession(c:Context<Env>,value:Session,user:User){
  const config=requiredConfig(c.env),handle=randomSecret(),hash=await sessionHash(handle),credentials=providerCredentials(value,randomSecret(),user.id)
  const sealed=await sealSession(credentials,config.key,hash+':'+user.id)
  await rpc(c.env,'web_session_create',{p_hash:hash,p_user:user.id,p_sealed:sealed,p_absolute:config.absolute,p_idle:config.idle})
+ if(await rpc(c.env,'web_session_register',{p_hash:hash,p_csrf_hash:await sessionHash(credentials.csrfToken)})!==true){await revokeWebSession(c.env,hash);throw new SessionFault(503,'Session setup unavailable')}
  setCookie(c,SESSION_COOKIE,handle,{path:'/',secure:true,httpOnly:true,sameSite:'Lax',maxAge:config.absolute})
  return {user:{id:user.id},csrfToken:credentials.csrfToken}
+}
+export async function logoutWebSession(c:Context<Env>){
+ requireBrowserOrigin(c)
+ const handle=getCookie(c,SESSION_COOKIE)
+ if(!handle){clearSessionCookie(c);return}
+ const csrf=c.req.header('X-LMS-CSRF')??''
+ if(!/^[A-Za-z0-9_-]{43}$/.test(handle)||!/^[A-Za-z0-9_-]{43}$/.test(csrf))throw new SessionFault(403,'Session logout proof required')
+ const hash=await sessionHash(handle)
+ // Register an older current handle lazily; a historical handle still cannot read data.
+ const current=await rpc(c.env,'web_session_load',{p_hash:hash})
+ if(current&&!current.registered){const credentials=await openSession(current.sealed_credentials,requiredConfig(c.env).key,hash+':'+current.user_id);await rpc(c.env,'web_session_register',{p_hash:hash,p_csrf_hash:await sessionHash(credentials.csrfToken)})}
+ const result=await rpc(c.env,'web_session_logout',{p_hash:hash,p_csrf_hash:await sessionHash(csrf)})
+ if(result?.status==='denied')throw new SessionFault(403,'Refresh your session before retrying logout')
+ if(!['revoked','missing'].includes(result?.status))throw new SessionFault(503,'Logout unavailable')
+ clearSessionCookie(c)
+ if(result.status==='revoked')try{
+  const credentials=await openSession(result.sealed_credentials,requiredConfig(c.env).key,result.handle_hash+':'+result.user_id),db=provider(c.env)
+  await db.auth.setSession(credentials);await db.auth.signOut({scope:'local'})
+ }catch{/* LMS family is already revoked even if the provider/key is unavailable. */}
 }
 export async function readWebSession(c:Context<Env>,verify=true):Promise<WebSession|null>{
  const handle=getCookie(c,SESSION_COOKIE)
@@ -67,6 +87,7 @@ export async function readWebSession(c:Context<Env>,verify=true):Promise<WebSess
  if(verify&&row.lease_active)throw new SessionFault(409,'Another session update is in progress. Retry shortly.')
  let credentials:Credentials
  try{credentials=await openSession(row.sealed_credentials,c.env.SESSION_ENCRYPTION_KEY!,hash+':'+row.user_id)}catch{await revokeWebSession(c.env,hash);clearSessionCookie(c);throw new SessionFault(401,'Session unavailable. Sign in again.')}
+ if(!row.registered&&await rpc(c.env,'web_session_register',{p_hash:hash,p_csrf_hash:await sessionHash(credentials.csrfToken)})!==true)throw new SessionFault(409,'Session changed. Retry shortly.')
  const session:WebSession={hash,userId:row.user_id,version:row.version,expiresAt:row.expires_at,credentials}
  if(!verify)return session
  if(credentials.expires_at<=Math.floor(Date.now()/1000)+45){
