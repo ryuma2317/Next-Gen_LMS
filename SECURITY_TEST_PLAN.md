@@ -1,5 +1,7 @@
 # Security Acceptance Scenarios
 
+Latest supporting evidence (2026-11-17): server-session source 8d53fcc3cd27c979ae55faa42d8e6e83b76dad3b / PR #27 passes run 44004625804: 39 native + 101 API/PGlite/client-state + 36 synthetic Chromium tests (176), API/type/build and bounded publication/bundle checks. Coverage includes encrypted credential projection, scoped service-only vault RPCs, CSRF/origin checks, handle rotation, both logout/rotation orderings, expiry/revocation, stale leases and obsolete client responses. This does not complete any full live scenario below. Every migration through 017 is required; provider/mail/MFA, actual HTTPS cookie/device/CSP, separate connections, operational recovery and load remain NOT RUN. SESSION_SECURITY.md records operator duties and limitations.
+
 Updated: 2026-11-12. Companion to [SECURITY.md](SECURITY.md) and the [README operational runbook](README.md).
 
 Latest scoped automated evidence: project PR #22 and post-merge run 43172849901 pass 36 domain, 75 API/PGlite and 32 synthetic browser tests, including project assignment scope, MFA, NULL/stale revisions, direct-RPC grants and revocation/archive cases. This does not complete any full scenario below. Actual Supabase/PostgREST/Auth/MFA, separate-connection races, real devices, load and operational recovery remain NOT RUN. Earlier quiz evidence below is historical.
