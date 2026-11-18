@@ -4,7 +4,7 @@ Updated 2026-11-12. Project boards, sprints and explicit assigned access are mer
 
 | Area | Existing implementation | Still needed |
 | --- | --- | --- |
-| Identity and workspaces | Supabase sign-in, activation, authenticator sources, verified API sessions, edition membership | Approved login/recovery provider setup; genuine multi-role/edition workspace selection; complete invitation/recovery behavior and live verification |
+| Identity and workspaces | Server-held encrypted browser sessions, activation, authenticator sources, verified API sessions, edition membership | Approved HTTPS/Auth/mail/expiry/key setup and live acceptance; genuine multi-role/edition workspace selection; complete invitation/recovery behavior |
 | Admissions | Versioned forms, private receipts, review, verified-mailbox activation and invitation queue | Approved question sets, interview/orientation operations, drafts/withdrawal/waitlists if required, notification delivery and full staff administration |
 | Annual setup and people | Edition/course/section data and scoped capability model | In-app yearly configuration, department/specialization changes, role/capability assignment, readiness/finalization and audited admin selection overrides |
 | Course selection | Transactional own-seat claims, annual limits and department core checks | Actual calendar/conflict rules, waitlist/move/cancellation policy, admin readiness tools, team formation and real simultaneous-connection testing |

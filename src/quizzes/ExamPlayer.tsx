@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { Session } from '@supabase/supabase-js'
+import type { BrowserSession as Session } from '../../shared/session'
 import { api } from '../lib'
 import { gradeChoice, type QuizAttempt, type QuizSignal } from '../../shared/quizzes'
 import { sampleQuestion, scoreText, type ListedQuiz } from './demo'
@@ -7,8 +7,8 @@ import { Choices } from './Choices'
 export function ExamPlayer({ initial, quiz, session, onLeave }: { initial: QuizAttempt; quiz: ListedQuiz; session: Session|null; onLeave: ()=>void }) {
  const [attempt,setAttempt]=useState(initial),[answers,setAnswers]=useState(initial.answers),[message,setMessage]=useState(''),[monitorMessage,setMonitorMessage]=useState(''),[saving,setSaving]=useState(false),[dirty,setDirty]=useState(false),[now,setNow]=useState(Date.now())
  const current=useRef(initial),draft=useRef(initial.answers),unsaved=useRef(false),inFlight=useRef(false),offset=useRef(Date.parse(initial.server_now)-Date.now())
- const pending=useRef<{id:string;kind:QuizSignal}[]>([]),flushing=useRef(false),count=useRef(0),retryAt=useRef(0),token=useRef(session?.access_token)
- token.current=session?.access_token
+ const pending=useRef<{id:string;kind:QuizSignal}[]>([]),flushing=useRef(false),count=useRef(0),retryAt=useRef(0),token=useRef(session?.csrfToken)
+ token.current=session?.csrfToken
  const remaining=Math.max(0,Math.ceil((Date.parse(attempt.deadline)-now-offset.current)/1000)),active=attempt.status==='active'
  function apply(row:QuizAttempt){current.current=row;setAttempt(row);offset.current=Date.parse(row.server_now)-Date.now()}
  async function flush(){
@@ -57,7 +57,7 @@ export function ExamPlayer({ initial, quiz, session, onLeave }: { initial: QuizA
    {quiz.config.monitoring==='fullscreen_visibility'&&<button className="secondary-button" onClick={()=>{const surface=document.querySelector<HTMLElement>('.quiz-workspace');void surface?.requestFullscreen?.().catch(()=>setMessage('Fullscreen is unavailable. Contact your teacher for an accommodation.'))}}>Return to fullscreen</button>}</div>
    :<p role="status">Result: <strong>{scoreText(attempt.score_units)}</strong> / {scoreText(attempt.max_units)}. This is not a certificate eligibility decision.</p>}
   <button className="secondary-button" onClick={()=>{if(!active||window.confirm('Leave this attempt? Its timer continues. Unsaved changes may be lost.')){if(document.fullscreenElement)void document.exitFullscreen().catch(()=>{});onLeave()}}}>Back to quizzes</button>
-  {active&&session&&message.includes('Unsaved answers')&&<button className="secondary-button" disabled={saving} onClick={()=>{if(window.confirm('Replace this page’s unsaved answers with the last server-saved answers?'))void api<QuizAttempt>('/quiz-attempts/'+initial.id,session.access_token).then(row=>{apply(row);draft.current=row.answers;setAnswers(row.answers);unsaved.current=false;setDirty(false);retryAt.current=0;setMessage('Server-saved answers reloaded.')}).catch(()=>setMessage('Reload unavailable. Keep this page open and contact your teacher.'))}}>Reload server-saved answers</button>}
+  {active&&session&&message.includes('Unsaved answers')&&<button className="secondary-button" disabled={saving} onClick={()=>{if(window.confirm('Replace this page’s unsaved answers with the last server-saved answers?'))void api<QuizAttempt>('/quiz-attempts/'+initial.id,session.csrfToken).then(row=>{apply(row);draft.current=row.answers;setAnswers(row.answers);unsaved.current=false;setDirty(false);retryAt.current=0;setMessage('Server-saved answers reloaded.')}).catch(()=>setMessage('Reload unavailable. Keep this page open and contact your teacher.'))}}>Reload server-saved answers</button>}
   {monitorMessage&&<p role="status">{monitorMessage}</p>}{message&&<p role="status">{message}</p>}
  </article>
 }

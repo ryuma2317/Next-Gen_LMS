@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { Session } from '@supabase/supabase-js'
+import type { BrowserSession as Session } from '../../shared/session'
 import { api } from '../lib'
 import { gradeChoice, type GameView, type Question } from '../../shared/quizzes'
 import { sampleQuestion, scoreText, type ListedQuiz } from './demo'
@@ -7,7 +7,7 @@ import { Choices } from './Choices'
 export function GamePlayer({runId,quiz,session,host,onLeave,previewQuestions=[sampleQuestion]}:{runId:string;quiz:ListedQuiz;session:Session|null;host:boolean;onLeave:()=>void;previewQuestions?:Question[]}){
  const [game,setGame]=useState<GameView|null>(session?null:{id:runId,version:1,phase:'lobby',question_index:-1,deadline:null,server_now:new Date().toISOString(),question:null,correct:null,joined:false,answered:false,players:0,answered_count:0,standings:[]})
  const [selected,setSelected]=useState<string[]>([]),[message,setMessage]=useState(''),[busy,setBusy]=useState(false),[submittedIndex,setSubmittedIndex]=useState(-2),[now,setNow]=useState(Date.now())
- const offset=useRef(0),lastRow=useRef<{version:number;time:number}|null>(null),token=useRef(session?.access_token);token.current=session?.access_token
+ const offset=useRef(0),lastRow=useRef<{version:number;time:number}|null>(null),token=useRef(session?.csrfToken);token.current=session?.csrfToken
  function apply(row:GameView){const time=Date.parse(row.server_now),old=lastRow.current;if(old&&(row.version<old.version||(row.version===old.version&&time<old.time)))return;lastRow.current={version:row.version,time};offset.current=time-Date.now();setGame(row)}
  async function refresh(){if(token.current)apply(await api('/quiz-games/'+runId,token.current))}
  useEffect(()=>{

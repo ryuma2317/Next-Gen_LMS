@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import type { Session } from '@supabase/supabase-js'
+import type { BrowserSession as Session } from '../shared/session'
 import { ArrowUpRight, BookOpen, FileText, Plus, RefreshCw } from 'lucide-react'
 import { api } from './lib'
 import { MfaPanel } from './MfaPanel'
@@ -36,20 +36,20 @@ export function Learning({ session, edition, role }: { session: Session | null; 
   const canEdit = !!activeClass?.can_edit, canGrade = !!activeClass?.can_grade && !!activeClass?.mfa_ready
   async function loadClass() {
     if (!session || !section) return
-    const result = await api<{ lessons: Lesson[]; assignments: Assignment[] }>(`/sections/${section}/learning`, session.access_token)
+    const result = await api<{ lessons: Lesson[]; assignments: Assignment[] }>(`/sections/${section}/learning`, session.csrfToken)
     setLessons(result.lessons); setAssignments(result.assignments)
     setAssignment(current => result.assignments.some(a => a.id === current) ? current : result.assignments[0]?.id ?? '')
   }
-  async function loadWork() { if (session && assignment) setWork(await api<WorkSubmission[]>(`/assignments/${assignment}/work?offset=${workPage * 50}`, session.access_token)) }
+  async function loadWork() { if (session && assignment) setWork(await api<WorkSubmission[]>(`/assignments/${assignment}/work?offset=${workPage * 50}`, session.csrfToken)) }
   useEffect(() => {
     if (!session) return
     let cancelled = false; setBusy(true)
     if (!edition) { setBusy(false); return }
-    api<LearningClass[]>(`/editions/${edition}/learning`, session.access_token).then(rows => {
+    api<LearningClass[]>(`/editions/${edition}/learning`, session.csrfToken).then(rows => {
       if (!cancelled) { setClasses(rows); setSection(current => rows.some(row => row.id === current) ? current : rows[0]?.id ?? '') }
     }).catch(e => { if (!cancelled) setMessage(e.message) }).finally(() => { if (!cancelled) setBusy(false) })
     return () => { cancelled = true }
-  }, [session?.access_token, edition])
+  }, [session?.csrfToken, edition])
   useEffect(() => {
     setLessonDraft(null); setAssignmentDraft(null); setGrading(null); setResponse(''); setLink(''); pendingSubmission.current = null
     if (session) { setLessons([]); setAssignments([]); setWork([]); setAssignment('') }
@@ -57,24 +57,24 @@ export function Learning({ session, edition, role }: { session: Session | null; 
   useEffect(() => {
     if (!session || !section) return
     let cancelled = false; setBusy(true)
-    api<{ lessons: Lesson[]; assignments: Assignment[] }>(`/sections/${section}/learning`, session.access_token).then(result => {
+    api<{ lessons: Lesson[]; assignments: Assignment[] }>(`/sections/${section}/learning`, session.csrfToken).then(result => {
       if (!cancelled) { setLessons(result.lessons); setAssignments(result.assignments); setAssignment(current => result.assignments.some(a => a.id === current) ? current : result.assignments[0]?.id ?? '') }
     }).catch(e => { if (!cancelled) setMessage(e.message) }).finally(() => { if (!cancelled) setBusy(false) })
     return () => { cancelled = true }
-  }, [section, session?.access_token])
+  }, [section, session?.csrfToken])
   useEffect(() => {
     setResponse(''); setLink(''); setGrading(null); setWorkPage(0); setReleaseReasons({}); pendingSubmission.current = null
   }, [assignment])
   useEffect(() => {
     if (!session || !assignment) return
     let cancelled = false; setWork([])
-    api<WorkSubmission[]>(`/assignments/${assignment}/work?offset=${workPage * 50}`, session.access_token).then(rows => { if (!cancelled) setWork(rows) }).catch(e => { if (!cancelled) setMessage(e.message) })
+    api<WorkSubmission[]>(`/assignments/${assignment}/work?offset=${workPage * 50}`, session.csrfToken).then(rows => { if (!cancelled) setWork(rows) }).catch(e => { if (!cancelled) setMessage(e.message) })
     return () => { cancelled = true }
-  }, [assignment, session?.access_token, workPage])
+  }, [assignment, session?.csrfToken, workPage])
   async function mutate(path: string, body: unknown, success: string) {
     if (!session || busy) return false
     setBusy(true); setMessage('')
-    try { await api(path, session.access_token, body); await loadClass(); await loadWork(); setMessage(success); return true }
+    try { await api(path, session.csrfToken, body); await loadClass(); await loadWork(); setMessage(success); return true }
     catch (e) { setMessage((e as Error).message); return false } finally { setBusy(false) }
   }
   async function saveLesson(e: FormEvent) {

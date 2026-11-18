@@ -1,34 +1,30 @@
 import { useState, type FormEvent } from 'react'
 import { ShieldCheck } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
-import { auth } from './lib'
+import { accountAction, authFactors } from './lib'
 export function MfaPanel({ allowEnrollment = false }: { allowEnrollment?: boolean }) {
   const [code, setCode] = useState(''), [busy, setBusy] = useState(false), [message, setMessage] = useState('')
   // Enrollment material stays in component memory; never log, persist or send it to a QR service.
   const [setup, setSetup] = useState<{ id: string; uri: string } | null>(null)
   async function enroll() {
-    if (!auth || busy || setup) return
+    if (busy || setup) return
     setBusy(true); setMessage('')
     try {
-      const factors = await auth.auth.mfa.listFactors()
-      if (factors.error) throw new Error('Unable to load authenticator settings. Try again.')
-      if (factors.data.totp.some(f => f.status === 'verified')) throw new Error('An authenticator is already enrolled. Verify with its current code below. Contact the platform owner if you have lost access.')
-      if (factors.data.all.some(f => f.factor_type === 'totp' && f.status === 'unverified')) throw new Error('An incomplete authenticator setup already exists. Contact the platform owner to safely clear it before starting again.')
-      const result = await auth.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'Next-Gen authenticator' })
-      if (result.error || !result.data) throw new Error('Unable to start authenticator setup. Retry or contact the platform owner.')
-      setSetup({ id: result.data.id, uri: result.data.totp.uri }); setCode('')
+      const factors = await authFactors()
+      if (factors.some(f => f.status === 'verified')) throw new Error('An authenticator is already enrolled. Verify with its current code below. Contact the platform owner if you have lost access.')
+      if (factors.some(f => f.status === 'unverified')) throw new Error('An incomplete authenticator setup already exists. Contact the platform owner to safely clear it before starting again.')
+      const result = await accountAction<{id:string;uri:string}>('enroll',{})
+      setSetup({ id: result.id, uri: result.uri }); setCode('')
     } catch (error) { setMessage((error as Error).message) } finally { setBusy(false) }
   }
   async function verify(e: FormEvent) {
-    e.preventDefault(); if (!auth || busy) return
+    e.preventDefault(); if (busy) return
     setBusy(true); setMessage('')
     try {
-      const factors = await auth.auth.mfa.listFactors()
-      if (factors.error) throw new Error('Unable to load authenticator')
-      const factor = setup ?? factors.data.totp.find(f => f.status === 'verified')
+      const factors = await authFactors()
+      const factor = setup ?? factors.find(f => f.status === 'verified')
       if (!factor) throw new Error('Set up an authenticator in Account settings first.')
-      const result = await auth.auth.mfa.challengeAndVerify({ factorId: factor.id, code })
-      if (result.error) throw new Error('Check your current authenticator code')
+      await accountAction('verify',{factorId:factor.id,code})
       setSetup(null); setCode(''); setMessage('MFA verified. Your assigned program permissions still apply.')
     } catch (error) { setMessage((error as Error).message) } finally { setBusy(false) }
   }

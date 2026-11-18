@@ -1,5 +1,9 @@
 # API guide for the Next-Gen LMS
 
+Current browser requests use opaque HttpOnly cookies and same-origin CSRF protection; provider access/refresh tokens stay server-side. The contract covers 77 operations, including the server auth/account routes. Import the latest public/openapi.json, apply every migration through 017 and follow SESSION_SECURITY.md. API-client Bearer access remains separately supported; never copy a server/service key or real cookie/proof into a public Apidog environment. Older browser-token examples below are historical.
+
+In Apidog use a separate synthetic HTTPS test environment, preserve the cookie from /api/auth/login and send Origin, X-LMS-Request: 1 and X-LMS-CSRF on cookie writes. Never export a live cookie, CSRF value, provider token, password, invitation or authenticator material. Actual Apidog import and provider acceptance remain NOT RUN.
+
 An API is how the website asks the server to do work. For example, a trainee clicks **Join class**, the website sends a request, and the server checks eligibility and available seats before saving anything. API documentation explains which requests exist, what information to send and what the reply means. Your juniors will need it when changing the website, debugging errors or adding features.
 
 **OpenAPI** is a standard file format for that documentation. **Apidog** is an optional app that can display the file, organize requests and help test them. The LMS runs without Apidog. This increment adds no paid service, deployment or package dependency.

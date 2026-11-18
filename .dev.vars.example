@@ -1,10 +1,19 @@
-# Worker server configuration. Use the same project as the frontend.
+# Worker server configuration. No provider client is created in the browser.
 SUPABASE_URL=
 SUPABASE_PUBLISHABLE_KEY=
-# Server-only key for the narrow public-intake bridge and optional invitation jobs.
+# Server-only key for the narrow session vault, public-intake bridge and optional invitation jobs.
 # NEVER copy this to a VITE variable. Leave empty to keep public writes disabled.
 SUPABASE_SECRET_KEY=
 ENABLE_INVITATIONS=false
 INVITE_REDIRECT_URL=
 # Generate 32 random bytes as base64url. Server only; never put in VITE variables.
 ATTENDANCE_SIGNING_KEY=
+# Required to enable browser sign-in. Leave empty until an isolated pilot is configured.
+# Exact HTTPS origin, without trailing slash. Never trust forwarded Origin/Host values.
+PUBLIC_APP_ORIGIN=
+# Generate a separate random 32-byte base64url key, held only in Worker secrets.
+SESSION_ENCRYPTION_KEY=
+# Operator must explicitly choose idle and absolute seconds for the pilot.
+# Technical bounds: 300 <= idle <= absolute <= 604800. No live policy is assumed.
+SESSION_IDLE_SECONDS=
+SESSION_ABSOLUTE_SECONDS=

@@ -3,7 +3,7 @@ import { operations } from './operations.mjs'
 
 const errors = {
  400: 'Malformed input, invalid identifier, unsupported fields or page.',
- 401: 'Sign in with a valid Supabase user access token.',
+ 401: 'Sign in with a valid server-held browser session or an explicitly supported user Bearer API credential.',
  403: 'Scope, verified eligibility, MFA or permitted resource state is unavailable.',
  404: 'Resource is unavailable. Private details are not disclosed.',
  409: 'Action unavailable: check permission, MFA, revision, workflow, capacity, time window or configured rules. Preserve unsaved work and reload permitted state before deciding to retry.',
@@ -25,12 +25,12 @@ export function buildOpenAPI() {
   const response = { description: 'Successful response.', headers: noStore, content: json(op.response) }
   if (op.example) response.content['application/json'].example = op.example
   const responses = { [status]: response }
-  const codes = new Set([413,500,...(op.operationId === 'health' ? [] : [503]),...(!op.public ? [401] : []),...(op.path.includes('{id}') && op.operationId !== 'publishedRecruitmentForm' ? [400] : []),...(op.errors ?? [])])
+  const codes = new Set([413,500,...(op.operationId === 'health' ? [] : [503]),...(!op.public ? [401,403,409] : []),...(op.path.includes('{id}') && op.operationId !== 'publishedRecruitmentForm' ? [400] : []),...(op.errors ?? [])])
   for (const code of [...codes].sort((a,b)=>a-b)) responses[code] = { description: errors[code], headers: { ...noStore, ...(code === 429 ? { 'Retry-After': { description: 'Current cooldown in seconds.', schema: { type: 'string', const: '60' } } } : {}) }, content: json(ref('Error')) }
   const operation = {
    operationId: op.operationId, summary: op.summary, tags: [op.tag],
-   description: op.access + (op.rateLimit ? '\n\nRate limit: ' + op.rateLimit : '') + (op.method === 'post' ? '\n\nJSON bodies are bounded to 32 KiB. Unknown fields are rejected by the relevant validators; cross-field, scope and timing rules remain server/database checks.' : ''),
-   ...(op.public ? { security: [] } : {}),
+   description: op.access + (op.rateLimit ? '\n\nRate limit: ' + op.rateLimit : '') + (op.method === 'post' ? '\n\nJSON bodies are bounded to 32 KiB. Cookie-authenticated writes require configured same-origin HTTPS, JSON, X-LMS-Request: 1 and X-LMS-CSRF. Unknown fields are rejected; scope and timing remain server/database checks.' : ''),
+   ...(op.public ? { security: [] } : op.cookieOnly?{security:[{BrowserCookie:[]}]}:{}),
    ...(parameters.length ? { parameters } : {}),
    ...(op.request ? { requestBody: { required: true, content: json(op.request) } } : {}),
    responses,
@@ -48,8 +48,8 @@ export function buildOpenAPI() {
   info: { title: 'Next-Gen Engagement LMS API', version: '0.4.0', description: 'Implemented LMS HTTP interface. See API_GUIDE.md for setup, authentication, revisions, limitations and Apidog import. No production deployment or complete LMS is implied. All examples are synthetic; schemas do not replace database authorization or runtime verification.' },
   servers: [{ url: 'http://127.0.0.1:5173', description: 'Local Vite/Worker development only. Configure a separate approved test environment in your API client.' }],
   tags: [...new Set(operations.map(op=>op.tag))].map(name=>({name})),
-  security: [{ BearerAuth: [] }], paths,
-  components: { securitySchemes: { BearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT', description: 'Supabase USER access token, validated by Auth. Never use a service-role/secret key as a user token. Membership, capability, scope and MFA are enforced separately. Some owner/trainer paths require MFA only for privileged access; read operation descriptions.' } }, schemas }
+  security: [{ BrowserCookie: [] },{ BearerAuth: [] }], paths,
+  components: { securitySchemes: { BrowserCookie:{type:'apiKey',in:'cookie',name:'__Host-lms_session',description:'Opaque Secure/HttpOnly/host-only cookie issued by server login. JavaScript cannot read it. No provider token is stored in this cookie. Use session-bound CSRF and origin checks on browser writes.'},BearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT', description: 'Optional API-client Supabase USER access token, validated by Auth. The LMS browser never receives or sends this token. Never use a service-role/secret key as a user token. Capability, scope and MFA remain separate. Do not combine with the browser cookie.' } }, schemas }
  }
 }
 export const serializeOpenAPI = () => JSON.stringify(buildOpenAPI(), null, 2) + '\n'

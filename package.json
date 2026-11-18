@@ -7,7 +7,9 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
-    "check": "npm run check:api && tsc --noEmit",
+    "check": "npm run check:publication && npm run check:api && tsc --noEmit",
+    "check:publication": "node scripts/publication-safety.mjs",
+    "check:bundle": "node scripts/publication-safety.mjs --bundle",
     "docs:api": "node scripts/build-api-docs.mjs",
     "check:api": "node scripts/build-api-docs.mjs --check",
     "test": "npm run test:domain && vitest run",
